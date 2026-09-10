@@ -1,6 +1,7 @@
 package chess;
 
 import java.util.Collection;
+import java.util.function.BinaryOperator;
 
 /**
  * A class that can manage a chess game, making moves on a board
@@ -10,15 +11,19 @@ import java.util.Collection;
  */
 public class ChessGame {
 
-    public ChessGame() {
+    private ChessBoard board;
+    private boolean isWhitesTurn;
 
+    public ChessGame() {
+        board = new ChessBoard();
+        isWhitesTurn = true;
     }
 
     /**
      * @return Which team's turn it is
      */
     public TeamColor getTeamTurn() {
-        throw new RuntimeException("Not implemented");
+        return isWhitesTurn ? TeamColor.WHITE : TeamColor.BLACK;
     }
 
     /**
@@ -27,7 +32,7 @@ public class ChessGame {
      * @param team the team whose turn it is
      */
     public void setTeamTurn(TeamColor team) {
-        throw new RuntimeException("Not implemented");
+        isWhitesTurn = team == TeamColor.WHITE;
     }
 
     /**
