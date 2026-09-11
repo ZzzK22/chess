@@ -42,9 +42,11 @@ public class ChessBoard {
      * (How the game of chess normally starts)
      */
     public void resetBoard() {
-        for(var i = 2; i < 6; i++)
-            for(var j = 0; j < 8; j++)
+        for(var i = 2; i < 6; i++) {
+            for(var j = 0; j < 8; j++) {
                 board[i][j] = null;
+            }
+        }
         board[0][0] = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.ROOK);
         board[0][1] = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KNIGHT);
         board[0][2] = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.BISHOP);

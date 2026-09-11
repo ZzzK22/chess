@@ -59,11 +59,11 @@ public class ChessPiece {
 
         switch(piece.type){
             case PieceType.BISHOP:
-                for (var drow : new int[]{-1, 1})
-                    for (var dcol : new int[]{-1, 1}){
+                for (var drow : new int[]{-1, 1}) {
+                    for (var dcol : new int[]{-1, 1}) {
                         int row = pos.getRow() + drow;
                         int col = pos.getColumn() + dcol;
-                        while(row < 9 && row > 0 && col < 9 && col > 0) {
+                        while (row < 9 && row > 0 && col < 9 && col > 0) {
                             var target = new ChessPosition(row, col);
                             if (board.getPiece(target) == null) {
                                 moves.add(new ChessMove(pos, target, null));
@@ -71,20 +71,23 @@ public class ChessPiece {
                                 col += dcol;
                                 continue;
                             }
-                            if(board.getPiece(target).pieceColor != pieceColor){
+                            if (board.getPiece(target).pieceColor != pieceColor) {
                                 moves.add(new ChessMove(pos, target, null));
                             }
                             break;
                         }
                     }
+                }
                 break;
             case PieceType.QUEEN:
-                for (var drow : new int[]{-1, 0, 1})
-                    for (var dcol : new int[]{-1, 0, 1}){
-                        if(drow == dcol && drow == 0) continue;
+                for (var drow : new int[]{-1, 0, 1}) {
+                    for (var dcol : new int[]{-1, 0, 1}) {
+                        if (drow == dcol && drow == 0) {
+                            continue;
+                        }
                         int row = pos.getRow() + drow;
                         int col = pos.getColumn() + dcol;
-                        while(row < 9 && row > 0 && col < 9 && col > 0) {
+                        while (row < 9 && row > 0 && col < 9 && col > 0) {
                             var target = new ChessPosition(row, col);
                             if (board.getPiece(target) == null) {
                                 moves.add(new ChessMove(pos, target, null));
@@ -92,20 +95,23 @@ public class ChessPiece {
                                 col += dcol;
                                 continue;
                             }
-                            if(board.getPiece(target).pieceColor != pieceColor){
+                            if (board.getPiece(target).pieceColor != pieceColor) {
                                 moves.add(new ChessMove(pos, target, null));
                             }
                             break;
                         }
                     }
+                }
                 break;
             case PieceType.ROOK:
-                for (var drow : new int[]{-1, 0, 1})
-                    for (var dcol : new int[]{-1, 0, 1}){
-                        if((drow + dcol) % 2 == 0) continue;
+                for (var drow : new int[]{-1, 0, 1}) {
+                    for (var dcol : new int[]{-1, 0, 1}) {
+                        if ((drow + dcol) % 2 == 0) {
+                            continue;
+                        }
                         int row = pos.getRow() + drow;
                         int col = pos.getColumn() + dcol;
-                        while(row < 9 && row > 0 && col < 9 && col > 0) {
+                        while (row < 9 && row > 0 && col < 9 && col > 0) {
                             var target = new ChessPosition(row, col);
                             if (board.getPiece(target) == null) {
                                 moves.add(new ChessMove(pos, target, null));
@@ -113,37 +119,44 @@ public class ChessPiece {
                                 col += dcol;
                                 continue;
                             }
-                            if(board.getPiece(target).pieceColor != pieceColor){
+                            if (board.getPiece(target).pieceColor != pieceColor) {
                                 moves.add(new ChessMove(pos, target, null));
                             }
                             break;
                         }
                     }
+                }
                 break;
             case PieceType.KING:
-                for (var row : new int[]{-1, 0, 1})
+                for (var row : new int[]{-1, 0, 1}) {
                     for (var col : new int[]{-1, 0, 1}) {
                         var target = new ChessPosition(pos.getRow() + row, pos.getColumn() + col);
                         boolean targetOutOfBounds = pos.getRow() + row < 1 || pos.getRow() + row > 8 ||
-                                                 pos.getColumn() + col < 1 || pos.getColumn() + col > 8;
-                        if(targetOutOfBounds || (board.getPiece(target) != null && board.getPiece(target).getTeamColor() == getTeamColor()))
+                                pos.getColumn() + col < 1 || pos.getColumn() + col > 8;
+                        if (targetOutOfBounds || (board.getPiece(target) != null && board.getPiece(target).getTeamColor() == getTeamColor())) {
                             continue;
-                        else
+                        } else {
                             moves.add(new ChessMove(pos, target, null));
+                        }
                     }
+                }
                 break;
             case PieceType.KNIGHT:
-                for (var row : new int[]{-2, -1, 0, 1, 2})
+                for (var row : new int[]{-2, -1, 0, 1, 2}) {
                     for (var col : new int[]{-2, -1, 0, 1, 2}) {
-                        if(row * row + col * col != 5) continue;
+                        if (row * row + col * col != 5) {
+                            continue;
+                        }
                         var target = new ChessPosition(pos.getRow() + row, pos.getColumn() + col);
                         boolean targetOutOfBounds = pos.getRow() + row < 1 || pos.getRow() + row > 8 ||
                                 pos.getColumn() + col < 1 || pos.getColumn() + col > 8;
-                        if(targetOutOfBounds || (board.getPiece(target) != null && board.getPiece(target).getTeamColor() == getTeamColor()))
+                        if (targetOutOfBounds || (board.getPiece(target) != null && board.getPiece(target).getTeamColor() == getTeamColor())) {
                             continue;
-                        else
+                        } else {
                             moves.add(new ChessMove(pos, target, null));
+                        }
                     }
+                }
                 break;
             case PieceType.PAWN:
                 int direction = piece.pieceColor == ChessGame.TeamColor.WHITE ? 1 : -1;
@@ -164,16 +177,20 @@ public class ChessPiece {
                     }
                 }
                 for(var dcol : new int[]{-1, 1}){
-                    if (pos.getColumn() + dcol == 0 || pos.getColumn() + dcol == 9) continue;
+                    if (pos.getColumn() + dcol == 0 || pos.getColumn() + dcol == 9) {
+                        continue;
+                    }
                     target = new ChessPosition(pos.getRow() + direction, pos.getColumn() + dcol);
-                    if (board.getPiece(target) != null && board.getPiece(target).getTeamColor() != piece.pieceColor)
-                        if(promote){
+                    if (board.getPiece(target) != null && board.getPiece(target).getTeamColor() != piece.pieceColor) {
+                        if (promote) {
                             moves.add(new ChessMove(pos, target, PieceType.QUEEN));
                             moves.add(new ChessMove(pos, target, PieceType.ROOK));
                             moves.add(new ChessMove(pos, target, PieceType.BISHOP));
                             moves.add(new ChessMove(pos, target, PieceType.KNIGHT));
-                        } else
+                        } else {
                             moves.add(new ChessMove(pos, target, null));
+                        }
+                    }
                 }
         }
 
