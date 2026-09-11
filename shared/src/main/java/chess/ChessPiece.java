@@ -1,6 +1,7 @@
 package chess;
 
 import java.util.Collection;
+import java.util.ArrayList;
 import java.util.Objects;
 
 /**
@@ -52,8 +53,87 @@ public class ChessPiece {
      *
      * @return Collection of valid moves
      */
-    public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        throw new RuntimeException("Not implemented");
+    public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition pos) {
+        ArrayList<ChessMove> moves = new ArrayList<ChessMove>();
+        ChessPiece piece = board.getPiece(pos);
+
+        switch(piece.type){
+            case PieceType.BISHOP:
+                for (var drow : new int[]{-1, 1})
+                    for (var dcol : new int[]{-1, 1}){
+                        int row = pos.getRow() + drow;
+                        int col = pos.getColumn() + dcol;
+                        while(row < 9 && row > 0 && col < 9 && col > 0) {
+                            var target = new ChessPosition(row, col);
+                            if (board.getPiece(target) == null) {
+                                moves.add(new ChessMove(pos, target, null));
+                                row += drow;
+                                col += dcol;
+                                continue;
+                            }
+                            if(board.getPiece(target).pieceColor != pieceColor){
+                                moves.add(new ChessMove(pos, target, null));
+                            }
+                            break;
+                        }
+                    }
+                break;
+            case PieceType.QUEEN:
+                for (var drow : new int[]{-1, 0, 1})
+                    for (var dcol : new int[]{-1, 0, 1}){
+                        if(drow == dcol && drow == 0) continue;
+                        int row = pos.getRow() + drow;
+                        int col = pos.getColumn() + dcol;
+                        while(row < 9 && row > 0 && col < 9 && col > 0) {
+                            var target = new ChessPosition(row, col);
+                            if (board.getPiece(target) == null) {
+                                moves.add(new ChessMove(pos, target, null));
+                                row += drow;
+                                col += dcol;
+                                continue;
+                            }
+                            if(board.getPiece(target).pieceColor != pieceColor){
+                                moves.add(new ChessMove(pos, target, null));
+                            }
+                            break;
+                        }
+                    }
+                break;
+            case PieceType.ROOK:
+                for (var drow : new int[]{-1, 0, 1})
+                    for (var dcol : new int[]{-1, 0, 1}){
+                        if((drow + dcol) % 2 == 0) continue;
+                        int row = pos.getRow() + drow;
+                        int col = pos.getColumn() + dcol;
+                        while(row < 9 && row > 0 && col < 9 && col > 0) {
+                            var target = new ChessPosition(row, col);
+                            if (board.getPiece(target) == null) {
+                                moves.add(new ChessMove(pos, target, null));
+                                row += drow;
+                                col += dcol;
+                                continue;
+                            }
+                            if(board.getPiece(target).pieceColor != pieceColor){
+                                moves.add(new ChessMove(pos, target, null));
+                            }
+                            break;
+                        }
+                    }
+                break;
+            case PieceType.KING:
+                for (var row : new int[]{-1, 0, 1})
+                    for (var col : new int[]{-1, 0, 1}) {
+                        var target = new ChessPosition(pos.getRow() + row, pos.getColumn() + col);
+                        boolean targetOutOfBounds = pos.getRow() + row < 0 || pos.getRow() + row > 7 ||
+                                                 pos.getColumn() + col < 0 || pos.getColumn() + col > 7;
+                        if(targetOutOfBounds || (board.getPiece(target) != null && board.getPiece(target).getTeamColor() == getTeamColor()))
+                            continue;
+                        else
+                            moves.add(new ChessMove(pos, target, null));
+                    }
+        }
+
+        return moves;
     }
 
     @Override
