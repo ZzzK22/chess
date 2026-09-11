@@ -58,55 +58,12 @@ public class ChessPiece {
         ChessPiece piece = board.getPiece(pos);
 
         switch(piece.type){
-            case PieceType.BISHOP:
-                for (var drow : new int[]{-1, 1}) {
-                    for (var dcol : new int[]{-1, 1}) {
-                        int row = pos.getRow() + drow;
-                        int col = pos.getColumn() + dcol;
-                        while (row < 9 && row > 0 && col < 9 && col > 0) {
-                            var target = new ChessPosition(row, col);
-                            if (board.getPiece(target) == null) {
-                                moves.add(new ChessMove(pos, target, null));
-                                row += drow;
-                                col += dcol;
-                                continue;
-                            }
-                            if (board.getPiece(target).pieceColor != pieceColor) {
-                                moves.add(new ChessMove(pos, target, null));
-                            }
-                            break;
-                        }
-                    }
-                }
-                break;
-            case PieceType.QUEEN:
+            case PieceType.QUEEN: case PieceType.BISHOP: case PieceType.ROOK:
                 for (var drow : new int[]{-1, 0, 1}) {
                     for (var dcol : new int[]{-1, 0, 1}) {
-                        if (drow == dcol && drow == 0) {
-                            continue;
-                        }
-                        int row = pos.getRow() + drow;
-                        int col = pos.getColumn() + dcol;
-                        while (row < 9 && row > 0 && col < 9 && col > 0) {
-                            var target = new ChessPosition(row, col);
-                            if (board.getPiece(target) == null) {
-                                moves.add(new ChessMove(pos, target, null));
-                                row += drow;
-                                col += dcol;
-                                continue;
-                            }
-                            if (board.getPiece(target).pieceColor != pieceColor) {
-                                moves.add(new ChessMove(pos, target, null));
-                            }
-                            break;
-                        }
-                    }
-                }
-                break;
-            case PieceType.ROOK:
-                for (var drow : new int[]{-1, 0, 1}) {
-                    for (var dcol : new int[]{-1, 0, 1}) {
-                        if ((drow + dcol) % 2 == 0) {
+                        if (piece.type == PieceType.ROOK && (drow + dcol) % 2 == 0 ||
+                            piece.type == PieceType.BISHOP && (drow == 0 || dcol == 0) ||
+                         /* piece.type == PieceType.QUEEN && */ drow == 0 && dcol == 0) {
                             continue;
                         }
                         int row = pos.getRow() + drow;
