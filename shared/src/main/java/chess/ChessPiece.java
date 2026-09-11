@@ -124,13 +124,57 @@ public class ChessPiece {
                 for (var row : new int[]{-1, 0, 1})
                     for (var col : new int[]{-1, 0, 1}) {
                         var target = new ChessPosition(pos.getRow() + row, pos.getColumn() + col);
-                        boolean targetOutOfBounds = pos.getRow() + row < 0 || pos.getRow() + row > 7 ||
-                                                 pos.getColumn() + col < 0 || pos.getColumn() + col > 7;
+                        boolean targetOutOfBounds = pos.getRow() + row < 1 || pos.getRow() + row > 8 ||
+                                                 pos.getColumn() + col < 1 || pos.getColumn() + col > 8;
                         if(targetOutOfBounds || (board.getPiece(target) != null && board.getPiece(target).getTeamColor() == getTeamColor()))
                             continue;
                         else
                             moves.add(new ChessMove(pos, target, null));
                     }
+                break;
+            case PieceType.KNIGHT:
+                for (var row : new int[]{-2, -1, 0, 1, 2})
+                    for (var col : new int[]{-2, -1, 0, 1, 2}) {
+                        if(row * row + col * col != 5) continue;
+                        var target = new ChessPosition(pos.getRow() + row, pos.getColumn() + col);
+                        boolean targetOutOfBounds = pos.getRow() + row < 1 || pos.getRow() + row > 8 ||
+                                pos.getColumn() + col < 1 || pos.getColumn() + col > 8;
+                        if(targetOutOfBounds || (board.getPiece(target) != null && board.getPiece(target).getTeamColor() == getTeamColor()))
+                            continue;
+                        else
+                            moves.add(new ChessMove(pos, target, null));
+                    }
+                break;
+            case PieceType.PAWN:
+                int direction = piece.pieceColor == ChessGame.TeamColor.WHITE ? 1 : -1;
+                var target = new ChessPosition(pos.getRow() + direction, pos.getColumn());
+                boolean promote = pos.getRow() + direction == 1 || pos.getRow() + direction == 8;
+                if (board.getPiece(target) == null) {
+                    if(promote){
+                        moves.add(new ChessMove(pos, target, PieceType.QUEEN));
+                        moves.add(new ChessMove(pos, target, PieceType.ROOK));
+                        moves.add(new ChessMove(pos, target, PieceType.BISHOP));
+                        moves.add(new ChessMove(pos, target, PieceType.KNIGHT));
+                    } else {
+                        moves.add(new ChessMove(pos, target, null));
+                        target = new ChessPosition(pos.getRow() + 2 * direction, pos.getColumn());
+                        if (pos.getRow() == (piece.pieceColor == ChessGame.TeamColor.WHITE ? 2 : 7) && board.getPiece(target) == null) {
+                            moves.add(new ChessMove(pos, target, null));
+                        }
+                    }
+                }
+                for(var dcol : new int[]{-1, 1}){
+                    if (pos.getColumn() + dcol == 0 || pos.getColumn() + dcol == 9) continue;
+                    target = new ChessPosition(pos.getRow() + direction, pos.getColumn() + dcol);
+                    if (board.getPiece(target) != null && board.getPiece(target).getTeamColor() != piece.pieceColor)
+                        if(promote){
+                            moves.add(new ChessMove(pos, target, PieceType.QUEEN));
+                            moves.add(new ChessMove(pos, target, PieceType.ROOK));
+                            moves.add(new ChessMove(pos, target, PieceType.BISHOP));
+                            moves.add(new ChessMove(pos, target, PieceType.KNIGHT));
+                        } else
+                            moves.add(new ChessMove(pos, target, null));
+                }
         }
 
         return moves;
