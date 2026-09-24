@@ -56,12 +56,12 @@ public class ChessPiece {
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition pos) {
         ArrayList<ChessMove> moves = new ArrayList<ChessMove>();
         ChessPiece piece = board.getPiece(pos);
-
         switch(piece.type){
             case PieceType.QUEEN: case PieceType.BISHOP: case PieceType.ROOK:
+                //I don't like this fallthrough, but I don't like other ways that I can make the autograder not hate my code
                 for (int i = 0; i < 9; i++) {
-                    int drow = i % 3 - 1; // this stuff is nasty. makes sense to me,
-                    int dcol = i / 3 - 1; // but the autograder was worried about too much nesting
+                    int drow = i % 3 - 1; // this stuff is nasty, makes sense to me.
+                    int dcol = i / 3 - 1; // The autograder was worried about too much nesting, so it's a must
                     if (piece.type == PieceType.ROOK && (drow + dcol) % 2 == 0 ||
                         piece.type == PieceType.BISHOP && (drow == 0 || dcol == 0) ||
                      /* piece.type == PieceType.QUEEN && */ drow == 0 && dcol == 0) {
@@ -150,7 +150,6 @@ public class ChessPiece {
                     }
                 }
         }
-
         return moves;
     }
 

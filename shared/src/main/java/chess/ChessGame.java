@@ -1,5 +1,6 @@
 package chess;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.function.BinaryOperator;
 
@@ -16,6 +17,7 @@ public class ChessGame {
 
     public ChessGame() {
         board = new ChessBoard();
+        board.resetBoard();
         isWhitesTurn = true;
     }
 
@@ -51,7 +53,13 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        throw new RuntimeException("Not implemented");
+        ArrayList<ChessMove> moves = new ArrayList<>();
+        ChessPiece piece = board.getPiece(startPosition);
+        if(piece == null){
+            return moves;
+        }
+        return piece.pieceMoves(board, startPosition);
+
     }
 
     /**
@@ -61,7 +69,12 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        throw new RuntimeException("Not implemented");
+        if(validMoves(move.startPosition).contains(move) &&
+                board.getPiece(move.getStartPosition()).getTeamColor() == getTeamTurn()){
+            // make move
+        } else {
+            throw new InvalidMoveException("Invalid move");
+        }
     }
 
     /**
@@ -110,6 +123,6 @@ public class ChessGame {
      * @return the chessboard
      */
     public ChessBoard getBoard() {
-        throw new RuntimeException("Not implemented");
+        return board;
     }
 }
