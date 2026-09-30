@@ -84,7 +84,35 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        ChessPosition kingPos = null;
+        for(int row = 1; row < 9; row++){
+            for(int col = 1; col < 9; col++) {
+                var pos = new ChessPosition(row, col);
+                var piece = board.getPiece(pos);
+                if(piece != null && piece.getTeamColor() == teamColor && piece.getPieceType() == ChessPiece.PieceType.KING){
+                    kingPos = new ChessPosition(row, col);
+                    row = 10;
+                    break;
+                }
+            }
+        }
+        if(kingPos == null) return false; // if we failed to find the king, you're obviously not in check
+        for(int row = 1; row < 9; row++){
+            for(int col = 1; col < 9; col++){
+                var pos = new ChessPosition(row, col);
+                var piece = board.getPiece(pos);
+                if(piece == null || piece.getTeamColor() == teamColor){
+                    continue;
+                }
+                var moves = piece.pieceMoves(board, pos);
+                for(ChessMove move : moves){
+                    if(move.getEndPosition() == kingPos){
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     /**
