@@ -25,6 +25,21 @@ public class ChessBoard {
     public void addPiece(ChessPosition position, ChessPiece piece) {
         board[position.getRow() - 1][position.getColumn() - 1] = piece;
     }
+    public void removePiece(ChessPosition position){
+        addPiece(position, null);
+    }
+    /* Moves a piece on the chessboard.
+     * Assumes the move is valid.
+     */
+    public void movePiece(ChessMove move){
+        if(move.promotionPiece == null) {
+            addPiece(move.getEndPosition(), getPiece(move.getStartPosition()));
+        } else {
+            addPiece(move.getEndPosition(), new ChessPiece(getPiece(move.getStartPosition()).getTeamColor(), move.promotionPiece));
+        }
+        getPiece(move.getEndPosition()).hasMoved = true;
+        removePiece(move.getStartPosition());
+    }
 
     /**
      * Gets a chess piece on the chessboard
@@ -97,5 +112,10 @@ public class ChessBoard {
     @Override
     public int hashCode() {
         return Arrays.deepHashCode(board);
+    }
+
+    @Override
+    public String toString() {
+        return board.toString();
     }
 }

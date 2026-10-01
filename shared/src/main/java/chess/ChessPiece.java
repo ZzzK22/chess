@@ -14,10 +14,12 @@ public class ChessPiece {
 
     private final ChessGame.TeamColor pieceColor;
     private final ChessPiece.PieceType type;
+    public boolean hasMoved;
 
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
         this.pieceColor = pieceColor;
         this.type = type;
+        hasMoved = false;
     }
 
     /**
@@ -97,6 +99,8 @@ public class ChessPiece {
                         }
                     }
                 }
+                // castling
+
                 break;
             case PieceType.KNIGHT:
                 for (var row : new int[]{-2, -1, 0, 1, 2}) {
@@ -168,5 +172,19 @@ public class ChessPiece {
     @Override
     public int hashCode(){
         return Objects.hashCode(type) + (pieceColor == ChessGame.TeamColor.WHITE ? 1 : 0);
+    }
+
+    @Override
+    public String toString() {
+        char piece = 0;
+        switch(type) {
+            case PAWN -> piece += 'P';
+            case KING -> piece += 'K';
+            case ROOK -> piece += 'R';
+            case QUEEN -> piece += 'Q';
+            case BISHOP -> piece += 'B';
+            case KNIGHT -> piece += 'N';
+        }
+        return String.valueOf((char)(piece + (pieceColor == ChessGame.TeamColor.BLACK ? ' ' : '\0')));
     }
 }
