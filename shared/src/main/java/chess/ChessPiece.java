@@ -100,7 +100,27 @@ public class ChessPiece {
                     }
                 }
                 // castling
-
+                if(!piece.hasMoved){ // has the king moved?
+                    int homeRow = piece.pieceColor == ChessGame.TeamColor.WHITE ? 1 : 8;
+                    ChessPosition rookInColumn1 = new ChessPosition(homeRow, 1);
+                    ChessPosition column2 = new ChessPosition(homeRow, 2);
+                    ChessPosition column3 = new ChessPosition(homeRow, 3);
+                    ChessPosition column4 = new ChessPosition(homeRow, 4);
+                    // pos is column 5
+                    ChessPosition column6 = new ChessPosition(homeRow, 6);
+                    ChessPosition column7 = new ChessPosition(homeRow, 7);
+                    ChessPosition rookInColumn8 = new ChessPosition(homeRow, 8);
+                    if(board.getPiece(rookInColumn8) != null && !board.getPiece(rookInColumn8).hasMoved && // has the rook moved?
+                        board.getPiece(column6) == null && board.getPiece(column7) == null // is the row empty?
+                    ){
+                        moves.add(new ChessMove(pos, column7, null));
+                    }
+                    if(board.getPiece(rookInColumn1) != null && !board.getPiece(rookInColumn1).hasMoved && // has the rook moved?
+                            board.getPiece(column2) == null && board.getPiece(column3) == null && board.getPiece(column4) == null // is the row empty?
+                    ){
+                        moves.add(new ChessMove(pos, column3, null));
+                    }
+                }
                 break;
             case PieceType.KNIGHT:
                 for (var row : new int[]{-2, -1, 0, 1, 2}) {
@@ -137,7 +157,7 @@ public class ChessPiece {
                         }
                     }
                 }
-                for(var dcol : new int[]{-1, 1}){
+                for(var dcol : new int[]{-1, 1}) {
                     if (pos.getColumn() + dcol == 0 || pos.getColumn() + dcol == 9) {
                         continue;
                     }
@@ -151,6 +171,13 @@ public class ChessPiece {
                         } else {
                             moves.add(new ChessMove(pos, target, null));
                         }
+                    }
+                    if(pos.getRow() == (piece.pieceColor == ChessGame.TeamColor.WHITE ? 5 : 4) &&
+                            board.getPreviousMove() != null &&
+                            Math.abs(board.getPreviousMove().getStartPosition().getColumn() - pos.getColumn()) == 1 &&
+                            board.getPiece(board.getPreviousMove().getEndPosition()).getPieceType() == PieceType.PAWN &&
+                            Math.abs(board.getPreviousMove().getStartPosition().getRow() - board.getPreviousMove().getEndPosition().getRow()) == 2){
+                        moves.add(new ChessMove(pos, target, null));
                     }
                 }
         }

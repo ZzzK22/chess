@@ -12,8 +12,19 @@ import java.util.Objects;
 public class ChessBoard {
 
     private ChessPiece[][] board;
+
+    public ChessMove getPreviousMove() {
+        return previousMove;
+    }
+
+    public void setPreviousMove(ChessMove previousMove) {
+        this.previousMove = previousMove;
+    }
+
+    private ChessMove previousMove;
     public ChessBoard() {
         board = new ChessPiece[8][8];
+        previousMove = null;
     }
 
     /**
@@ -37,7 +48,6 @@ public class ChessBoard {
         } else {
             addPiece(move.getEndPosition(), new ChessPiece(getPiece(move.getStartPosition()).getTeamColor(), move.promotionPiece));
         }
-        getPiece(move.getEndPosition()).hasMoved = true;
         removePiece(move.getStartPosition());
     }
 
@@ -98,6 +108,53 @@ public class ChessBoard {
         board[6][5] = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN);
         board[6][6] = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN);
         board[6][7] = new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN);
+    }
+
+    public boolean isInCheck(ChessGame.TeamColor teamColor) {
+        ChessPosition kingPos = null;
+        for(int row = 1; row < 9; row++){
+            for(int col = 1; col < 9; col++) {
+                var pos = new ChessPosition(row, col);
+                var piece = getPiece(pos);
+                if(piece != null && piece.getTeamColor() == teamColor && piece.getPieceType() == ChessPiece.PieceType.KING){
+                    kingPos = pos;
+                    row = 10;
+                    break;
+                }
+            }
+        }
+        if(kingPos == null) throw new RuntimeException("invalid state"); // if we failed to find the king, you're obviously not in check
+        for(int row = 1; row < 9; row++){
+            for(int col = 1; col < 9; col++){
+                var pos = new ChessPosition(row, col);
+                var piece = getPiece(pos);
+                if(piece == null || piece.getTeamColor() == teamColor){
+                    continue;
+                }
+                var moves = piece.pieceMoves(this, pos);
+                for(ChessMove move : moves){
+                    if(move.getEndPosition().equals(kingPos)){
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    public boolean isInCheckWithThisMove(ChessGame.TeamColor teamColor, ChessMove move){
+        ChessPiece eatenPiece = getPiece(move.getEndPosition());
+
+        movePiece(move);
+
+        boolean inCheck = isInCheck(getPiece(move.getEndPosition()).getTeamColor());
+
+        ChessMove reverseMove = new ChessMove(move.getEndPosition(), move.getStartPosition(),
+                move.promotionPiece != null ? ChessPiece.PieceType.PAWN : null // undo any promotions
+        );
+        movePiece(reverseMove);
+        addPiece(move.getEndPosition(), eatenPiece);
+        return inCheck;
     }
 
     @Override
