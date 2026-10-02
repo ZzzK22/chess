@@ -124,13 +124,7 @@ public class ChessGame {
         return board.isInCheck(teamColor);
     }
 
-    /**
-     * Determines if the given team is in checkmate
-     *
-     * @param teamColor which team to check for checkmate
-     * @return True if the specified team is in checkmate
-     */
-    public boolean isInCheckmate(TeamColor teamColor) {
+    private boolean isInMate(TeamColor teamColor){
         for(int row = 1; row < 9; row++){
             for(int col = 1; col < 9; col++){
                 ChessPosition pos = new ChessPosition(row, col);
@@ -140,7 +134,17 @@ public class ChessGame {
                 }
             }
         }
-        return isInCheck(teamColor);
+        return true;
+    }
+
+    /**
+     * Determines if the given team is in checkmate
+     *
+     * @param teamColor which team to check for checkmate
+     * @return True if the specified team is in checkmate
+     */
+    public boolean isInCheckmate(TeamColor teamColor) {
+        return isInMate(teamColor) && isInCheck(teamColor);
     }
 
     /**
@@ -151,16 +155,7 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        for(int row = 1; row < 9; row++){
-            for(int col = 1; col < 9; col++){
-                ChessPosition pos = new ChessPosition(row, col);
-                ChessPiece piece = board.getPiece(pos);
-                if(piece != null && piece.getTeamColor() == teamColor && !validMoves(pos).isEmpty()){
-                    return false;
-                }
-            }
-        }
-        return !isInCheck(teamColor);
+        return isInMate(teamColor) && !isInCheck(teamColor);
     }
 
     /**

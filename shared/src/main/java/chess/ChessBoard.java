@@ -123,7 +123,7 @@ public class ChessBoard {
                 }
             }
         }
-        if(kingPos == null) throw new RuntimeException("invalid state"); // if we failed to find the king, you're obviously not in check
+        if(kingPos == null) { throw new RuntimeException("invalid state"); } // if we failed to find the king, you're obviously not in check
         for(int row = 1; row < 9; row++){
             for(int col = 1; col < 9; col++){
                 var pos = new ChessPosition(row, col);
