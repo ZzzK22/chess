@@ -8,4 +8,7 @@ public interface DataAccess {
     UserData getUserByEmail(String email);
 
     void createUser(UserData userData);
+
+    AuthData createAuthToken(String username);
+    AuthData getAuthData(String username);
 }

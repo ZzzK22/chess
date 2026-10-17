@@ -6,14 +6,15 @@ public class Service {
         dataAccess.deleteAll();
     }
 
-    public static ErrorResponses register(UserData userData) {
+    public static ResponseData register(UserData userData) {
         if(dataAccess.getUserByEmail(userData.email()) != null){
-            return ErrorResponses.InvalidEmail;
+            return new ResponseData(ErrorResponses.InvalidEmail, "");
         }
         if (dataAccess.getUserByUsername(userData.username()) != null){
-            return ErrorResponses.InvalidUsername;
+            return new ResponseData(ErrorResponses.InvalidUsername, "");
         }
         dataAccess.createUser(userData);
-        return null;
+        AuthData authToken = dataAccess.createAuthToken(userData.username());
+        return new ResponseData(null, authToken.token());
     }
 }

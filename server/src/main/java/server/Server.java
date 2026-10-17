@@ -22,33 +22,31 @@ public class Server {
 
     private static void register(@NotNull Context ctx){
         Gson json = new Gson();
-        UserData userData = null;
-        userData = json.fromJson(ctx.body(), UserData.class);
-        ErrorResponses response = Service.register(userData);
-        switch (response){
+        UserData userData = json.fromJson(ctx.body(), UserData.class);
+        ResponseData response = Service.register(userData);
+        switch (response.error()){
             case null:
                 ctx.status(200);
+                ctx.result(json.toJson(response));
                 break;
             case InvalidUsername:
-                ctx.status(403);
+                ctx.status(400);
+                ctx.result("{\"message\": \"Username already taken!\"}");
                 break;
             case InvalidEmail:
-                ctx.status(403);
+                ctx.status(400);
+                ctx.result("{\"message\": \"You've already signed up with that email!\"}");
                 break;
             default:
                 ctx.status(500);
+                ctx.result("{\"message\": \"Something went wrong!\"}");
         }
     }
 
     private static void delete(@NotNull Context ctx){
-        handle(ctx);
+        ctx.result("{}");
+        ctx.status(203);
         Service.deleteAll();
-    }
-
-    private static void handle(@NotNull Context ctx){
-        var r = Map.of();
-        var json = new Gson();
-        ctx.json(json.toJson(r));
     }
 
     public int run(int desiredPort) {
