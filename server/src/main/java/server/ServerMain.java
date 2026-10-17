@@ -2,9 +2,13 @@ package server;
 
 import chess.*;
 
+import java.util.Scanner;
+
 public class ServerMain {
     public static void main(String[] args) {
-        var piece = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
-        System.out.println("♕ 240 Chess Server: " + piece);
+        var chessServer = new Server();
+        int port = chessServer.run(8080);
+        new Scanner(System.in).nextLine();
+        chessServer.stop();
     }
 }
