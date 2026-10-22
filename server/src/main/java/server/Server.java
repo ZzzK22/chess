@@ -26,7 +26,7 @@ public class Server {
     }
 
     private static void listGames(@NotNull Context ctx) {
-        ResponseData<List<ChessGame>> response = Service.listGames(ctx.header("authorization"));
+        ResponseData<List<GameData>> response = Service.listGames(ctx.header("authorization"));
 
         ctx.result(new Gson().toJson(response.data()));
         checkAuthorization(ctx, response.error());
