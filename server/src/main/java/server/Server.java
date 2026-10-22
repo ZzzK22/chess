@@ -57,15 +57,15 @@ public class Server {
                 break;
             case InvalidUsername:
                 ctx.status(400);
-                ctx.result("{\"message\": \"Invalid username!\"}");
+                ctx.result("{\"message\": \"Error: Invalid username!\"}");
                 break;
             case InvalidPassword:
                 ctx.status(400);
-                ctx.result("{\"message\": \"Invalid password!\"}");
+                ctx.result("{\"message\": \"Error: Invalid password!\"}");
                 break;
             default:
                 ctx.status(500);
-                ctx.result("{\"message\": \"Something went wrong!\"}");
+                ctx.result("{\"message\": \"Error: Something went wrong!\"}");
         }
     }
 
@@ -79,22 +79,22 @@ public class Server {
                 ctx.result(json.toJson(response));
                 break;
             case InvalidUsername:
-                ctx.status(400);
-                ctx.result("{\"message\": \"Username already taken!\"}");
+                ctx.status(403);
+                ctx.result("{\"message\": \"Error: Username already taken!\"}");
                 break;
             case InvalidEmail:
-                ctx.status(400);
-                ctx.result("{\"message\": \"You've already signed up with that email!\"}");
+                ctx.status(403);
+                ctx.result("{\"message\": \"Error: You've already signed up with that email!\"}");
                 break;
             default:
                 ctx.status(500);
-                ctx.result("{\"message\": \"Something went wrong!\"}");
+                ctx.result("{\"message\": \"Error: Something went wrong!\"}");
         }
     }
 
     private static void delete(@NotNull Context ctx){
         ctx.result("{}");
-        ctx.status(204);
+        ctx.status(200);
         Service.deleteAll();
     }
 
@@ -105,11 +105,11 @@ public class Server {
                 break;
             case InvalidAuthToken:
                 ctx.status(401);
-                ctx.result("{\"message\": \"Invalid authorization! (likely a duplicate request)\"}");
+                ctx.result("{\"message\": \"Error: Invalid authorization!\"}");
                 break;
             default:
                 ctx.status(500);
-                ctx.result("{\"message\": \"Something went wrong!\"}");
+                ctx.result("{\"message\": \"Error: Something went wrong!\"}");
         }
     }
 
