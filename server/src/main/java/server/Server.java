@@ -1,10 +1,12 @@
 package server;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 import io.javalin.*;
 import io.javalin.http.Context;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
 import java.util.Map;
 
 public class Server {
@@ -16,14 +18,45 @@ public class Server {
 
         javalin.delete("/db", Server::delete);
         javalin.post("/user", Server::register);
+        javalin.delete("/session", Server::logout);
+        javalin.post("/session", Server::login);
         // Register your endpoints and exception handlers here.
 
+    }
+
+    private static void logout(@NotNull Context ctx){
+        ErrorResponses error = Service.logout(ctx.header("authorization"));
+        ctx.status(203);
+        checkAuthorization(ctx, error);
+    }
+
+    private static void login(@NotNull Context ctx){
+        Gson json = new Gson();
+        UserData userData = json.fromJson(ctx.body(), UserData.class);
+        ResponseData<AuthData> response = Service.login(userData);
+        switch (response.error()){
+            case null:
+                ctx.status(200);
+                ctx.result(json.toJson(response));
+                break;
+            case InvalidUsername:
+                ctx.status(400);
+                ctx.result("{\"message\": \"Invalid username!\"}");
+                break;
+            case InvalidPassword:
+                ctx.status(400);
+                ctx.result("{\"message\": \"Invalid password!\"}");
+                break;
+            default:
+                ctx.status(500);
+                ctx.result("{\"message\": \"Something went wrong!\"}");
+        }
     }
 
     private static void register(@NotNull Context ctx){
         Gson json = new Gson();
         UserData userData = json.fromJson(ctx.body(), UserData.class);
-        ResponseData response = Service.register(userData);
+        ResponseData<String> response = Service.register(userData);
         switch (response.error()){
             case null:
                 ctx.status(200);
@@ -47,6 +80,21 @@ public class Server {
         ctx.result("{}");
         ctx.status(203);
         Service.deleteAll();
+    }
+
+    private static void checkAuthorization(@NotNull Context ctx, ErrorResponses error) {
+        switch (error){
+            case null:
+                // use the defaults set prior to calling this function
+                break;
+            case InvalidAuthToken:
+                ctx.status(401);
+                ctx.result("{\"message\": \"Invalid authorization! (likely a duplicate request)\"}");
+                break;
+            default:
+                ctx.status(500);
+                ctx.result("{\"message\": \"Something went wrong!\"}");
+        }
     }
 
     public int run(int desiredPort) {

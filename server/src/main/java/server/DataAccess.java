@@ -11,4 +11,6 @@ public interface DataAccess {
 
     AuthData createAuthToken(String username);
     AuthData getAuthData(String username);
+
+    boolean logout(String authToken);
 }

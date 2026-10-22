@@ -42,4 +42,22 @@ public class MemoryDataAccess implements DataAccess{
     public AuthData getAuthData(String username) {
         return authData.get(username);
     }
+
+    private AuthData findAuthDataByToken(String token){
+        for(var i : authData.entrySet()){
+            if(i.getValue().token().equals(token)){
+                return i.getValue();
+            }
+        }
+        return null;
+    }
+
+    public boolean logout(String authToken) {
+        AuthData data = findAuthDataByToken(authToken);
+        if (data == null) {
+            return false;
+        }
+        authData.remove(data.username());
+        return true;
+    }
 }

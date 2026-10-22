@@ -1,4 +1,4 @@
 package server;
 
-public record ResponseData(ErrorResponses error, String data) {
+public record ResponseData<T>(ErrorResponses error, T data) {
 }
