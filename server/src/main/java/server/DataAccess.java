@@ -1,6 +1,6 @@
 package server;
 
-import java.util.List;
+import java.util.Collection;
 
 public interface DataAccess {
     public void deleteAll();
@@ -15,5 +15,6 @@ public interface DataAccess {
 
     boolean logout(String authToken);
 
-    List<GameData> getGames();
+    GameData addGame(String gameName);
+    Collection<GameData> getGames();
 }

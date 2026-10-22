@@ -6,8 +6,7 @@ import io.javalin.*;
 import io.javalin.http.Context;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
-import java.util.Map;
+import java.util.Collection;
 
 public class Server {
 
@@ -21,12 +20,21 @@ public class Server {
         javalin.delete("/session", Server::logout);
         javalin.post("/session", Server::login);
         javalin.get("/game", Server::listGames);
+        javalin.post("/game", Server::createGame);
         // Register your endpoints and exception handlers here.
 
     }
 
+    private static void createGame(@NotNull Context ctx) {
+        String gameName = new Gson().fromJson(ctx.body(), GameData.class).gameName();
+        ResponseData<GameData> response = Service.createGame(ctx.header("authorization"), gameName);
+
+        ctx.status(204);
+        checkAuthorization(ctx, response.error());
+    }
+
     private static void listGames(@NotNull Context ctx) {
-        ResponseData<List<GameData>> response = Service.listGames(ctx.header("authorization"));
+        ResponseData<Collection<GameData>> response = Service.listGames(ctx.header("authorization"));
 
         ctx.result(new Gson().toJson(response.data()));
         checkAuthorization(ctx, response.error());
@@ -34,7 +42,7 @@ public class Server {
 
     private static void logout(@NotNull Context ctx){
         ErrorResponses error = Service.logout(ctx.header("authorization"));
-        ctx.status(203);
+        ctx.status(204);
         checkAuthorization(ctx, error);
     }
 
@@ -86,7 +94,7 @@ public class Server {
 
     private static void delete(@NotNull Context ctx){
         ctx.result("{}");
-        ctx.status(203);
+        ctx.status(204);
         Service.deleteAll();
     }
 

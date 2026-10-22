@@ -1,5 +1,6 @@
 package server;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
@@ -41,10 +42,20 @@ public class Service {
 
     }
 
-    public static ResponseData<List<GameData>> listGames(String authorization) {
+    public static ResponseData<Collection<GameData>> listGames(String authorization) {
         if(dataAccess.getAuthData(authorization) == null){
             return new ResponseData<>(ErrorResponses.InvalidAuthToken, null);
         }
         return new ResponseData<>(null, dataAccess.getGames());
+    }
+
+    public static ResponseData<GameData> createGame(String authorization, String gameName) {
+        if(dataAccess.getAuthData(authorization) == null){
+            return new ResponseData<>(ErrorResponses.InvalidAuthToken, null);
+        }
+
+        GameData data = dataAccess.addGame(gameName);
+
+        return new ResponseData<>(null, data);
     }
 }
