@@ -1,5 +1,6 @@
 package server;
 
+import java.util.List;
 import java.util.Objects;
 
 public class Service {
@@ -38,5 +39,12 @@ public class Service {
         return new ResponseData<>(null,
                 dataAccess.createAuthToken(data.username()));
 
+    }
+
+    public static ResponseData<List<GameData>> listGames(String authorization) {
+        if(dataAccess.getAuthData(authorization) == null){
+            return new ResponseData<>(ErrorResponses.InvalidAuthToken, null);
+        }
+        return new ResponseData<>(null, dataAccess.getGames());
     }
 }

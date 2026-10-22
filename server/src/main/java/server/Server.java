@@ -20,8 +20,16 @@ public class Server {
         javalin.post("/user", Server::register);
         javalin.delete("/session", Server::logout);
         javalin.post("/session", Server::login);
+        javalin.get("/game", Server::listGames);
         // Register your endpoints and exception handlers here.
 
+    }
+
+    private static void listGames(@NotNull Context ctx) {
+        ResponseData<List<ChessGame>> response = Service.listGames(ctx.header("authorization"));
+
+        ctx.result(new Gson().toJson(response.data()));
+        checkAuthorization(ctx, response.error());
     }
 
     private static void logout(@NotNull Context ctx){
