@@ -1,12 +1,10 @@
-package userTests;
+package user;
 
 import org.junit.jupiter.api.*;
 import server.AuthData;
 import server.ErrorResponses;
 import server.Service;
 import server.UserData;
-
-import java.net.HttpURLConnection;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class UserMadeTests {
