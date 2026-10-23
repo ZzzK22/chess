@@ -2,6 +2,7 @@ package userTests;
 
 import org.junit.jupiter.api.*;
 import server.AuthData;
+import server.ErrorResponses;
 import server.Service;
 import server.UserData;
 
@@ -59,10 +60,39 @@ public class UserMadeTests {
         Assertions.assertNotNull(Service.login(new UserData("", "", "")).error());
         Assertions.assertNotNull(Service.login(new UserData(null, "", "")).error());
         Assertions.assertNotNull(Service.login(new UserData("", null, "")).error());
+        Assertions.assertNotNull(Service.login(new UserData("username", "notpassword", "")).error());
     }
 
     @Test
     public void registerTestValid(){
+        Assertions.assertNull(Service.register(new UserData("non", "non", "non@non.non")).error());
+    }
 
+    @Test
+    public void registerTestInvalid(){
+        Assertions.assertNotNull(Service.register(new UserData("username", "non", "non@non.non")).error());
+        Assertions.assertNotNull(Service.register(user).error());
+    }
+
+    @Test
+    public void badAuthorization(){
+        Assertions.assertEquals(ErrorResponses.InvalidAuthToken, Service.listGames("badAuth").error());
+        Assertions.assertEquals(ErrorResponses.InvalidAuthToken, Service.joinGame("badAuth", true, 1));
+        Assertions.assertEquals(ErrorResponses.InvalidAuthToken, Service.logout("badAuth"));
+        Assertions.assertEquals(ErrorResponses.InvalidAuthToken, Service.createGame("badAuth", "irrelevant").error());
+    }
+
+    @Test
+    public void joinGameValid(){
+        int id = Service.createGame(tok, "name").data().gameID();
+        Assertions.assertNull(Service.joinGame(tok, true, id));
+    }
+
+    @Test
+    public void joinGameInvalid(){
+        int id = Service.createGame(tok, "name").data().gameID();
+        Assertions.assertEquals(ErrorResponses.GameExistsnt, Service.joinGame(tok, true, id + 100));
+        Assertions.assertNull(Service.joinGame(tok, true, id));
+        Assertions.assertEquals(ErrorResponses.InvalidColor, Service.joinGame(tok, true, id));
     }
 }
