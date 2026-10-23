@@ -1,4 +1,4 @@
 package server;
 
-public record AuthData(String username, String token) {
+public record AuthData(String username, String authToken) {
 }

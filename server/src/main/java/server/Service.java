@@ -1,7 +1,6 @@
 package server;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Objects;
 
 public class Service {
@@ -10,16 +9,16 @@ public class Service {
         dataAccess.deleteAll();
     }
 
-    public static ResponseData<String> register(UserData userData) {
+    public static ResponseData<AuthData> register(UserData userData) {
         if(dataAccess.getUserByEmail(userData.email()) != null){
-            return new ResponseData<>(ErrorResponses.InvalidEmail, "");
+            return new ResponseData<>(ErrorResponses.InvalidEmail, null);
         }
         if (dataAccess.getUserByUsername(userData.username()) != null){
-            return new ResponseData<>(ErrorResponses.InvalidUsername, "");
+            return new ResponseData<>(ErrorResponses.InvalidUsername, null);
         }
         dataAccess.createUser(userData);
         AuthData authToken = dataAccess.createAuthToken(userData.username());
-        return new ResponseData<>(null, authToken.token());
+        return new ResponseData<>(null, authToken);
     }
 
     public static ErrorResponses logout(String authToken){
@@ -57,5 +56,20 @@ public class Service {
         GameData data = dataAccess.addGame(gameName);
 
         return new ResponseData<>(null, data);
+    }
+
+    public static ErrorResponses joinGame(String authorization, boolean isWhite, int gameID) {
+        if(dataAccess.getAuthData(authorization) == null){
+            return ErrorResponses.InvalidAuthToken;
+        }
+        GameData data = dataAccess.getGameData(gameID);
+        if (data == null){
+            return ErrorResponses.GameExistsnt;
+        }
+        if(isWhite && data.whiteUsername() != null || !isWhite && data.blackUsername() != null){
+            return ErrorResponses.InvalidColor;
+        }
+        dataAccess.joinGame(dataAccess.getAuthData(authorization).username(), isWhite, gameID);
+        return null;
     }
 }

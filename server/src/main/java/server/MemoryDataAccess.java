@@ -13,6 +13,7 @@ public class MemoryDataAccess implements DataAccess{
     public void deleteAll(){
         userData = new HashMap<>();
         authData = new HashMap<>();
+        games = new HashMap<>();
     }
 
     public UserData getUserByUsername(String username) {
@@ -39,13 +40,13 @@ public class MemoryDataAccess implements DataAccess{
     public AuthData createAuthToken(String username) {
         String authToken = authStringFromInt(++authTokenizer);
         AuthData authData = new AuthData(username, authToken);
-        this.authData.put(username, authData);
+        this.authData.put(authToken, authData);
         return authData;
     }
 
     public AuthData getAuthData(String token){
         for(var i : authData.entrySet()){
-            if(i.getValue().token().equals(token)){
+            if(i.getValue().authToken().equals(token)){
                 return i.getValue();
             }
         }
@@ -56,12 +57,27 @@ public class MemoryDataAccess implements DataAccess{
         return games.values();
     }
 
+    public GameData getGameData(int gameID) {
+        return games.get(gameID);
+    }
+
+    public void joinGame(String username, boolean isWhite, int gameID) {
+        GameData game = games.get(gameID);
+        GameData newGame;
+        if(isWhite) {
+            newGame = new GameData(game.game(), username, game.blackUsername(), game.gameName(), game.gameID());
+        } else {
+            newGame = new GameData(game.game(), game.whiteUsername(), username, game.gameName(), game.gameID());
+        }
+        games.put(gameID, newGame);
+    }
+
     public boolean logout(String authToken) {
         AuthData data = this.getAuthData(authToken);
         if (data == null) {
             return false;
         }
-        authData.remove(data.username());
+        authData.remove(data.authToken());
         return true;
     }
 

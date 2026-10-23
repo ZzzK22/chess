@@ -17,4 +17,6 @@ public interface DataAccess {
 
     GameData addGame(String gameName);
     Collection<GameData> getGames();
+    GameData getGameData(int gameID);
+    void joinGame(String username, boolean isWhite, int gameID);
 }
