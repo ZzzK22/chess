@@ -1,4 +1,4 @@
-package server.service;
+package service;
 
 import org.junit.jupiter.api.*;
 import server.AuthData;

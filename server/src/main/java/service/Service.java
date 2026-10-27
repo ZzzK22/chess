@@ -1,8 +1,8 @@
-package server.service;
+package service;
 
 import server.*;
-import server.dataaccess.DataAccess;
-import server.dataaccess.MemoryDataAccess;
+import dataaccess.DataAccess;
+import dataaccess.MemoryDataAccess;
 
 import java.util.Collection;
 import java.util.Objects;

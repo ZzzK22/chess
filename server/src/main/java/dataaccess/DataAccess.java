@@ -1,4 +1,4 @@
-package server.dataaccess;
+package dataaccess;
 
 import server.AuthData;
 import server.GameData;
