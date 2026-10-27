@@ -16,7 +16,7 @@ public class Server {
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
 
         javalin.delete("/db", Server::delete);
-        javalin.post("/service", Server::register);
+        javalin.post("/user", Server::register);
         javalin.delete("/session", Server::logout);
         javalin.post("/session", Server::login);
         javalin.get("/game", Server::listGames);
