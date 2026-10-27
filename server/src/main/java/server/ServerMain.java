@@ -1,6 +1,6 @@
 package server;
 
-import chess.*;
+import server.server.Server;
 
 import java.util.Scanner;
 

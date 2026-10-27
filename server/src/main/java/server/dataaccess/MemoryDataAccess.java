@@ -1,11 +1,14 @@
-package server;
+package server.dataaccess;
 
 import chess.ChessGame;
+import server.AuthData;
+import server.GameData;
+import server.UserData;
 
 import java.util.HashMap;
 import java.util.Collection;
 
-public class MemoryDataAccess implements DataAccess{
+public class MemoryDataAccess implements DataAccess {
     private HashMap<String, UserData> userData = new HashMap<>();
     private HashMap<String, AuthData> authData = new HashMap<>();
     private HashMap<Integer, GameData> games = new HashMap<>();

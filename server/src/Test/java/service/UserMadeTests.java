@@ -1,9 +1,9 @@
-package user;
+package service;
 
 import org.junit.jupiter.api.*;
 import server.AuthData;
 import server.ErrorResponses;
-import server.Service;
+import server.service.Service;
 import server.UserData;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)

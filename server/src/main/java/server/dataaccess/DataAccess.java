@@ -1,4 +1,8 @@
-package server;
+package server.dataaccess;
+
+import server.AuthData;
+import server.GameData;
+import server.UserData;
 
 import java.util.Collection;
 

@@ -1,10 +1,11 @@
-package server;
+package server.server;
 
-import chess.ChessGame;
 import com.google.gson.Gson;
 import io.javalin.*;
 import io.javalin.http.Context;
 import org.jetbrains.annotations.NotNull;
+import server.*;
+import server.service.Service;
 
 import java.util.Collection;
 
@@ -16,7 +17,7 @@ public class Server {
         javalin = Javalin.create(config -> config.staticFiles.add("web"));
 
         javalin.delete("/db", Server::delete);
-        javalin.post("/user", Server::register);
+        javalin.post("/service", Server::register);
         javalin.delete("/session", Server::logout);
         javalin.post("/session", Server::login);
         javalin.get("/game", Server::listGames);
