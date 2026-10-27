@@ -1,10 +1,9 @@
-package server.server;
+package server;
 
 import com.google.gson.Gson;
 import io.javalin.*;
 import io.javalin.http.Context;
 import org.jetbrains.annotations.NotNull;
-import server.*;
 import server.service.Service;
 
 import java.util.Collection;

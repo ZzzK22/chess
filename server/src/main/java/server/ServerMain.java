@@ -1,7 +1,5 @@
 package server;
 
-import server.server.Server;
-
 import java.util.Scanner;
 
 public class ServerMain {
