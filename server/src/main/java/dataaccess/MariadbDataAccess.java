@@ -20,7 +20,7 @@ public class MariadbDataAccess implements DataAccess{
     }
 
 
-    public ErrorResponses deleteAll() { // TODO: make it delete and restart the database
+    public ErrorResponses deleteAll() {
         try(Connection conn = DatabaseManager.getConnection().data()){
             String statement = "DROP TABLE authTokens, games, users";
             try(PreparedStatement ps = conn.prepareStatement(statement)){
@@ -39,24 +39,71 @@ public class MariadbDataAccess implements DataAccess{
 
     public ResponseData<UserData> getUserByUsername(String username) {
         try(Connection conn = DatabaseManager.getConnection().data()){
-            String statement = "";
+            String statement = "SELECT username, email FROM users WHERE username=?";
             try(PreparedStatement ps = conn.prepareStatement(statement)){
+                ps.setString(1, username);
                 try(ResultSet rs = ps.executeQuery()){
-                    rs.next();
-                    return new ResponseData<>(null, null);
+                    if(rs.next()) {
+                        return new ResponseData<>(null, readUser(rs));
+                    }
                 }
             }
 
         } catch (SQLException e){
             return new ResponseData<>(ErrorResponses.DataAccessError, null);
         }
+        return new ResponseData<>(null, null);
+    }
+
+    private UserData readUser(ResultSet rs) throws SQLException{
+        int id = rs.getInt("id");
+        String username = rs.getString("username");
+        String email = rs.getString("email");
+        return new UserData(username, null, email);
+    }
+
+    private AuthData readAuthData(ResultSet rs) throws SQLException{
+        int id = rs.getInt("id");
+        String username = rs.getString("username");
+        String token = rs.getString("token");
+        return new AuthData(username, token);
     }
 
     public ResponseData<UserData> getUserByEmail(String email) {
-        return null;
+        try(Connection conn = DatabaseManager.getConnection().data()){
+            String statement = "SELECT username, email FROM users WHERE email=?";
+            try(PreparedStatement ps = conn.prepareStatement(statement)){
+                ps.setString(1, email);
+                try(ResultSet rs = ps.executeQuery()){
+                    if(rs.next()) {
+                        return new ResponseData<>(null, readUser(rs));
+                    }
+                }
+            }
+
+        } catch (SQLException e){
+            return new ResponseData<>(ErrorResponses.DataAccessError, null);
+        }
+        return new ResponseData<>(null, null);
     }
 
     public ErrorResponses createUser(UserData userData) {
+        try(Connection conn = DatabaseManager.getConnection().data()){
+            String statement = "INSERT INTO users (username, email, password) VALUES (?, ?, ?)";
+            try(PreparedStatement ps = conn.prepareStatement(statement)){
+                ps.setString(1, userData.username());
+                ps.setString(2, userData.email());
+                ps.setString(3, userData.password()); // TODO: HASH THE PASSWORD
+                try(ResultSet rs = ps.executeQuery()){
+
+                }
+            }
+
+        } catch (SQLException e){
+            DatabaseManager.createTables();
+            return ErrorResponses.DataAccessError;
+        }
+        DatabaseManager.createTables();
         return null;
     }
 
