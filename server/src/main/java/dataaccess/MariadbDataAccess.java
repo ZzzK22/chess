@@ -108,7 +108,30 @@ public class MariadbDataAccess implements DataAccess{
     }
 
     public ResponseData<AuthData> createAuthToken(String username) {
-        return null;
+        String tok = getNewAuthToken();
+        try(Connection conn = DatabaseManager.getConnection().data()){
+            String statement = "INSERT INTO authTokens (token, user_id) VALUES " +
+                    "(?, (SELECT id FROM users WHERE username = ?));";
+            try(PreparedStatement ps = conn.prepareStatement(statement)){
+                ps.setString(1, tok);
+                ps.setString(2, username);
+                try(ResultSet rs = ps.executeQuery()){
+                    if(rs.next()) {
+                        return new ResponseData<>(null, new AuthData(username, tok));
+                    }
+                }
+            }
+
+        } catch (SQLException e){
+            return new ResponseData<>(ErrorResponses.DataAccessError, null);
+        }
+        return new ResponseData<>(null, null);
+    }
+
+    int tokenGen = 0;
+
+    private String getNewAuthToken (){
+        return "Auth: " + ++tokenGen;
     }
 
     public ResponseData<AuthData> getAuthData(String token) {
