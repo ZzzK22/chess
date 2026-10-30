@@ -6,5 +6,6 @@ public enum ErrorResponses {
     InvalidPassword,
     InvalidAuthToken,
     InvalidColor,
-    GameExistsnt
+    GameExistsnt,
+    DataAccessError
 }

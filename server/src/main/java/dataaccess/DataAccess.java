@@ -1,26 +1,24 @@
 package dataaccess;
 
-import server.AuthData;
-import server.GameData;
-import server.UserData;
+import server.*;
 
 import java.util.Collection;
 
 public interface DataAccess {
-    public void deleteAll();
+    ErrorResponses deleteAll();
 
-    UserData getUserByUsername(String username);
-    UserData getUserByEmail(String email);
+    ResponseData<UserData> getUserByUsername(String username);
+    ResponseData<UserData> getUserByEmail(String email);
 
-    void createUser(UserData userData);
+    ErrorResponses createUser(UserData userData);
 
-    AuthData createAuthToken(String username);
-    AuthData getAuthData(String token);
+    ResponseData<AuthData> createAuthToken(String username);
+    ResponseData<AuthData> getAuthData(String token);
 
-    boolean logout(String authToken);
+    ErrorResponses logout(String authToken);
 
-    GameData addGame(String gameName);
-    Collection<GameData> getGames();
-    GameData getGameData(int gameID);
-    void joinGame(String username, boolean isWhite, int gameID);
+    ResponseData<GameData> addGame(String gameName);
+    ResponseData<Collection<GameData>> getGames();
+    ResponseData<GameData> getGameData(int gameID);
+    ErrorResponses joinGame(String username, boolean isWhite, int gameID);
 }
