@@ -1,59 +1,90 @@
 package dataaccess;
 
-import server.AuthData;
-import server.GameData;
-import server.UserData;
+import server.*;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Collection;
-import java.util.List;
 
 public class MariadbDataAccess implements DataAccess{
 
-    MariadbDataAccess(){
-
+    public ErrorResponses start(){
+        ErrorResponses error1 = DatabaseManager.createDatabase();
+        ErrorResponses error2 = DatabaseManager.createTables();
+        return error1 == null &&
+                error2 == null ?
+                null
+                : ErrorResponses.DataAccessError;
     }
 
-    public void deleteAll() {
 
-    }
+    public ErrorResponses deleteAll() { // TODO: make it delete and restart the database
+        try(Connection conn = DatabaseManager.getConnection().data()){
+            String statement = "DROP TABLE authTokens, games, users";
+            try(PreparedStatement ps = conn.prepareStatement(statement)){
+                try(ResultSet rs = ps.executeQuery()){
 
-    public UserData getUserByUsername(String username) {
+                }
+            }
+
+        } catch (SQLException e){
+            DatabaseManager.createTables();
+            return ErrorResponses.DataAccessError;
+        }
+        DatabaseManager.createTables();
         return null;
     }
 
-    public UserData getUserByEmail(String email) {
+    public ResponseData<UserData> getUserByUsername(String username) {
+        try(Connection conn = DatabaseManager.getConnection().data()){
+            String statement = "";
+            try(PreparedStatement ps = conn.prepareStatement(statement)){
+                try(ResultSet rs = ps.executeQuery()){
+                    rs.next();
+                    return new ResponseData<>(null, null);
+                }
+            }
+
+        } catch (SQLException e){
+            return new ResponseData<>(ErrorResponses.DataAccessError, null);
+        }
+    }
+
+    public ResponseData<UserData> getUserByEmail(String email) {
         return null;
     }
 
-    public void createUser(UserData userData) {
-
-    }
-
-    public AuthData createAuthToken(String username) {
+    public ErrorResponses createUser(UserData userData) {
         return null;
     }
 
-    public AuthData getAuthData(String token) {
+    public ResponseData<AuthData> createAuthToken(String username) {
         return null;
     }
 
-    public boolean logout(String authToken) {
-        return false;
-    }
-
-    public GameData addGame(String gameName) {
+    public ResponseData<AuthData> getAuthData(String token) {
         return null;
     }
 
-    public Collection<GameData> getGames() {
-        return List.of();
-    }
-
-    public GameData getGameData(int gameID) {
+    public ErrorResponses logout(String authToken) {
         return null;
     }
 
-    public void joinGame(String username, boolean isWhite, int gameID) {
+    public ResponseData<GameData> addGame(String gameName) {
+        return null;
+    }
 
+    public ResponseData<Collection<GameData>> getGames() {
+        return null;
+    }
+
+    public ResponseData<GameData> getGameData(int gameID) {
+        return null;
+    }
+
+    public ErrorResponses joinGame(String username, boolean isWhite, int gameID) {
+        return null;
     }
 }

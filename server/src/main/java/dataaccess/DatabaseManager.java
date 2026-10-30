@@ -1,5 +1,8 @@
 package dataaccess;
 
+import server.ErrorResponses;
+import server.ResponseData;
+
 import java.sql.*;
 import java.util.Properties;
 
@@ -8,6 +11,10 @@ public class DatabaseManager {
     private static String dbUsername;
     private static String dbPassword;
     private static String connectionUrl;
+
+    static String getDatabaseName(){
+        return databaseName;
+    }
 
     /*
      * Load the database information for the db.properties file.
@@ -19,14 +26,81 @@ public class DatabaseManager {
     /**
      * Creates the database if it does not already exist.
      */
-    static public void createDatabase() throws DataAccessException {
+    static public ErrorResponses createDatabase() {
         var statement = "CREATE DATABASE IF NOT EXISTS " + databaseName;
         try (var conn = DriverManager.getConnection(connectionUrl, dbUsername, dbPassword);
              var preparedStatement = conn.prepareStatement(statement)) {
             preparedStatement.executeUpdate();
         } catch (SQLException ex) {
-            throw new DataAccessException("failed to create database", ex);
+            return ErrorResponses.DataAccessError;
         }
+        return null;
+    }
+
+    static public ErrorResponses createTables() {
+        ErrorResponses error1 = createUserTable();
+        ErrorResponses error2 = createAuthTokenTable();
+        ErrorResponses error3 = createGamesTable();
+        return error1 == null &&
+               error2 == null &&
+               error3 == null ?
+                null
+                : ErrorResponses.DataAccessError;
+    }
+
+    static public ErrorResponses createUserTable() {
+        var statement = "CREATE TABLE users(" +
+                "id INT PRIMARY KEY AUTO_INCREMENT," +
+                "username VARCHAR(80) NOT NULL UNIQUE," +
+                "email VARCHAR(200) NOT NULL UNIQUE," +
+                "password VARCHAR(255) NOT NULL," +
+                ");";
+        try (var conn = DriverManager.getConnection(connectionUrl, dbUsername, dbPassword);
+             var preparedStatement = conn.prepareStatement(statement)) {
+            preparedStatement.executeUpdate();
+        } catch (SQLException ex) {
+            return ErrorResponses.DataAccessError;
+        }
+        return null;
+    }
+
+    static public ErrorResponses createAuthTokenTable() {
+        var statement = "CREATE TABLE authTokens(" +
+                "id INT PRIMARY KEY AUTO_INCREMENT," +
+                "user_id INT NOT NULL," +
+                "token VARCHAR(255) NOT NULL UNIQUE," +
+
+                "FOREIGN KEY (user_id)" +
+                "REFERENCES users(id)" +
+                ");";
+        try (var conn = DriverManager.getConnection(connectionUrl, dbUsername, dbPassword);
+             var preparedStatement = conn.prepareStatement(statement)) {
+            preparedStatement.executeUpdate();
+        } catch (SQLException ex) {
+            return ErrorResponses.DataAccessError;
+        }
+        return null;
+    }
+
+    static public ErrorResponses createGamesTable() {
+        var statement = "CREATE TABLE games(" +
+                "id INT PRIMARY KEY AUTO_INCREMENT," +
+                "player_white INT NOT NULL," +
+                "player_black INT NOT NULL," +
+                "token VARCHAR(255) NOT NULL UNIQUE," +
+
+                "FOREIGN KEY (player_white) " +
+                "REFERENCES users(id)," +
+                "FOREIGN KEY (player_black) " +
+                "REFERENCES users(id)" +
+                ");";
+        try (var conn = DriverManager.getConnection(connectionUrl, dbUsername, dbPassword);
+             var preparedStatement = conn.prepareStatement(statement)) {
+            preparedStatement.executeUpdate();
+        } catch (SQLException ex) {
+            return ErrorResponses.DataAccessError;
+        }
+        return null;
     }
 
     /**
@@ -41,27 +115,27 @@ public class DatabaseManager {
      * }
      * </code>
      */
-    static Connection getConnection() throws DataAccessException {
+    static ResponseData<Connection> getConnection() {
         try {
             //do not wrap the following line with a try-with-resources
             var conn = DriverManager.getConnection(connectionUrl, dbUsername, dbPassword);
             conn.setCatalog(databaseName);
-            return conn;
+            return new ResponseData<>(null, conn);
         } catch (SQLException ex) {
-            throw new DataAccessException("failed to get connection", ex);
+            return new ResponseData<>(ErrorResponses.DataAccessError, null);
         }
     }
 
-    private static void loadPropertiesFromResources() {
+    private static void loadPropertiesFromResources(){
         try (var propStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("db.properties")) {
             if (propStream == null) {
-                throw new Exception("Unable to load db.properties");
+                throw new Exception("Unable to load db.properties"); // TODO: figure out what in the world this is
             }
             Properties props = new Properties();
             props.load(propStream);
             loadProperties(props);
         } catch (Exception ex) {
-            throw new RuntimeException("unable to process db.properties", ex);
+            throw new RuntimeException("unable to process db.properties", ex); // TODO: And this too
         }
     }
 
