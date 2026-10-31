@@ -1,4 +1,4 @@
-package dataacces;
+package dataacces.sql;
 
 import dataaccess.MariadbDataAccess;
 import org.junit.jupiter.api.*;
@@ -41,7 +41,14 @@ public class DataAccessTests {
 
     @Test
     public void gameTests(){
-
+        Assertions.assertNull(dao.getGameData(1).data());
+        dao.createUser(uData);
+        var data = dao.addGame("game");
+        Assertions.assertNull(data.error());
+        Assertions.assertNull(dao.joinGame(uData.username(), true, data.data().gameID()));
+        var data2 = dao.getGames();
+        Assertions.assertNotNull(dao.getGameData(data.data().gameID()).data());
+        Assertions.assertEquals(1, data2.data().size());
     }
 }
 
