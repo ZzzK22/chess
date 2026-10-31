@@ -1,6 +1,7 @@
 package service;
 
 import dataaccess.MariadbDataAccess;
+import org.mindrot.jbcrypt.BCrypt;
 import server.*;
 import dataaccess.DataAccess;
 
@@ -14,8 +15,8 @@ public class Service {
     }
 
 
-    public static void deleteAll(){
-        dataAccess.deleteAll();
+    public static ErrorResponses deleteAll(){
+        return dataAccess.deleteAll();
     }
 
     public static ResponseData<AuthData> register(UserData userData) {
@@ -33,11 +34,16 @@ public class Service {
         if (userFromUsername.data() != null){
             return new ResponseData<>(ErrorResponses.InvalidUsername, null);
         }
-        ErrorResponses error = dataAccess.createUser(userData);
+        UserData newUserData = new UserData(userData.username(), hashPassword(userData.password()), userData.email());
+        ErrorResponses error = dataAccess.createUser(newUserData);
         if(error != null){
             return new ResponseData<>(error, null);
         }
         return dataAccess.createAuthToken(userData.username());
+    }
+
+    private static String hashPassword(String password){
+        return BCrypt.hashpw(password, BCrypt.gensalt());
     }
 
     public static ErrorResponses logout(String authToken){
@@ -49,7 +55,7 @@ public class Service {
         if(userData.username() == null || data == null){
             return new ResponseData<>(ErrorResponses.InvalidUsername, null);
         }
-        if(!Objects.equals(data.password(), userData.password())){
+        if(!BCrypt.checkpw(userData.password(), data.password())){
             return new ResponseData<>(ErrorResponses.InvalidPassword, null);
         }
         return dataAccess.createAuthToken(data.username());
@@ -64,7 +70,11 @@ public class Service {
     }
 
     public static ResponseData<GameData> createGame(String authorization, String gameName) {
-        if(dataAccess.getAuthData(authorization).data() == null){
+        ResponseData<AuthData> responseData = dataAccess.getAuthData(authorization);
+        if(responseData.error() != null){
+            return new ResponseData<>(responseData.error(), null);
+        }
+        if(responseData.data() == null){
             return new ResponseData<>(ErrorResponses.InvalidAuthToken, null);
         }
 

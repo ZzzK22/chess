@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import io.javalin.*;
 import io.javalin.http.Context;
 import org.jetbrains.annotations.NotNull;
+import org.mindrot.jbcrypt.BCrypt;
 import service.Service;
 
 import java.util.Collection;
@@ -148,7 +149,10 @@ public class Server {
     private static void delete(@NotNull Context ctx){
         ctx.result("{}");
         ctx.status(200);
-        Service.deleteAll();
+        if(Service.deleteAll() != null){
+            ctx.status(500);
+            ctx.result("{\"message\": \"Error: Something went wrong!\"}");
+        }
     }
 
     private static void checkAuthorization(@NotNull Context ctx, ErrorResponses error) {

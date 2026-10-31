@@ -120,7 +120,7 @@ public class MariadbDataAccess implements DataAccess{
                     if(rs.next()){
                         queryResult = rs.getInt("id");
                     } else {
-                        return new ResponseData<>(null, null);
+                        return new ResponseData<>(ErrorResponses.InvalidUsername, null);
                     }
                 }
             }
