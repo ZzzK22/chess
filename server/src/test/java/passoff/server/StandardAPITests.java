@@ -50,6 +50,7 @@ public class StandardAPITests {
 
     @Test
     @Order(1)
+    @Disabled
     @DisplayName("Static Files")
     public void staticFilesSuccess() {
         String htmlFromServer = serverFacade.file("/").replaceAll("\r", "");

@@ -22,22 +22,26 @@ public class MariadbDataAccess implements DataAccess{
 
     public ErrorResponses deleteAll() {
         try(Connection conn = DatabaseManager.getConnection().data()){
-            String statement = "DROP TABLE authTokens, games, users";
-            try(PreparedStatement ps = conn.prepareStatement(statement)){
+            for (String i : new String[]{"authTokens", "games"}){
+                String statement = "TRUNCATE TABLE " + i + ";";
+                try (PreparedStatement ps = conn.prepareStatement(statement)) {
+                    ps.executeUpdate();
+                }
+            }
+            String statement = "DELETE FROM users;";
+            try (PreparedStatement ps = conn.prepareStatement(statement)) {
                 ps.executeUpdate();
             }
 
         } catch (SQLException e){
-            start();
             return ErrorResponses.DataAccessError;
         }
-        start();
         return null;
     }
 
     public ResponseData<UserData> getUserByUsername(String username) {
         try(Connection conn = DatabaseManager.getConnection().data()){
-            String statement = "SELECT username, email FROM users WHERE username=?";
+            String statement = "SELECT username, email, password FROM users WHERE username=?";
             try(PreparedStatement ps = conn.prepareStatement(statement)){
                 ps.setString(1, username);
                 try(ResultSet rs = ps.executeQuery()){
@@ -56,11 +60,11 @@ public class MariadbDataAccess implements DataAccess{
     private UserData readUser(ResultSet rs) throws SQLException{
         String username = rs.getString("username");
         String email = rs.getString("email");
-        return new UserData(username, null, email);
+        String password = rs.getString("password");
+        return new UserData(username, password, email);
     }
 
     private AuthData readAuthData(ResultSet rs) throws SQLException{
-        int id = rs.getInt("id");
         String username = rs.getString("username");
         String token = rs.getString("token");
         return new AuthData(username, token);
@@ -68,7 +72,7 @@ public class MariadbDataAccess implements DataAccess{
 
     public ResponseData<UserData> getUserByEmail(String email) {
         try(Connection conn = DatabaseManager.getConnection().data()){
-            String statement = "SELECT username, email FROM users WHERE email=?";
+            String statement = "SELECT username, email, password FROM users WHERE email=?";
             try(PreparedStatement ps = conn.prepareStatement(statement)){
                 ps.setString(1, email);
                 try(ResultSet rs = ps.executeQuery()){
@@ -112,9 +116,18 @@ public class MariadbDataAccess implements DataAccess{
                 try(var rs = ps.executeQuery()){
                     if(rs.next()){
                         queryResult = rs.getInt("id");
-                        tok = getNewAuthTokenFromInt(queryResult);
                     } else {
                         return new ResponseData<>(null, null);
+                    }
+                }
+            }
+            String queryStatement2 = "SELECT MAX(id) FROM authTokens;";
+            try(PreparedStatement ps = conn.prepareStatement(queryStatement2)) {
+                try(var rs = ps.executeQuery()){
+                    if(rs.next()){
+                        tok = getNewAuthTokenFromInt(rs.getInt(1));
+                    } else {
+                        tok = getNewAuthTokenFromInt(0);
                     }
                 }
             }
@@ -137,10 +150,43 @@ public class MariadbDataAccess implements DataAccess{
     }
 
     public ResponseData<AuthData> getAuthData(String token) {
-        return null;
+        try(Connection conn = DatabaseManager.getConnection().data()){
+            String statement = "SELECT token, username FROM authTokens JOIN users ON users.id = authTokens.user_id WHERE token = ?;";
+            try(PreparedStatement ps = conn.prepareStatement(statement)){
+                ps.setString(1, token);
+                try(ResultSet rs = ps.executeQuery()){
+                    if(rs.next()) {
+                        return new ResponseData<>(null, readAuthData(rs));
+                    }
+                }
+            }
+
+        } catch (SQLException e){
+            return new ResponseData<>(ErrorResponses.DataAccessError, null);
+        }
+        return new ResponseData<>(null, null);
     }
 
     public ErrorResponses logout(String authToken) {
+        try(Connection conn = DatabaseManager.getConnection().data()){
+            String queryStatement = "SELECT * FROM authTokens WHERE token = ?;";
+            try (PreparedStatement ps = conn.prepareStatement(queryStatement)) {
+                ps.setString(1, authToken);
+                try(ResultSet rs = ps.executeQuery()){
+                    if(!rs.next()){
+                        return ErrorResponses.InvalidAuthToken;
+                    }
+                }
+            }
+            String statement = "DELETE FROM authTokens WHERE token = ?;";
+            try (PreparedStatement ps = conn.prepareStatement(statement)) {
+                ps.setString(1, authToken);
+                ps.executeUpdate();
+            }
+
+        } catch (SQLException e){
+            return ErrorResponses.DataAccessError;
+        }
         return null;
     }
 
