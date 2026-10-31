@@ -86,6 +86,7 @@ public class CustomizedDatabaseManager {
     static public ErrorResponses createGamesTable() {
         var statement = "CREATE TABLE games(" +
                 "id INT PRIMARY KEY AUTO_INCREMENT," +
+                "name VARCHAR(100) NOT NULL," +
                 "player_white INT," +
                 "player_black INT," +
                 "game_data TEXT," +

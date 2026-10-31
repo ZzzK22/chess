@@ -1,11 +1,14 @@
 package dataaccess;
 
+import chess.ChessGame;
+import com.google.gson.Gson;
 import server.*;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
 
 public class MariadbDataAccess implements DataAccess{
@@ -191,25 +194,71 @@ public class MariadbDataAccess implements DataAccess{
     }
 
     public ResponseData<GameData> addGame(String gameName) {
+        ChessGame game = new ChessGame();
+        int id;
         try(Connection conn = CustomizedDatabaseManager.getConnection().data()){
-            String statement = "INSERT INTO users (name) VALUES (?)";
+            String statement = "INSERT INTO games (name, game_data) VALUES (?, ?);";
+            String queryStatement = "SELECT LAST_INSERT_ID();";
             try(PreparedStatement ps = conn.prepareStatement(statement)){
                 ps.setString(1, gameName);
+                ps.setString(2, new Gson().toJson(game));
                 ps.executeUpdate();
+            }
+            try(PreparedStatement ps = conn.prepareStatement(queryStatement)){
+                try(ResultSet rs = ps.executeQuery()){
+                    rs.next();
+                    id = rs.getInt(1);
+                }
             }
 
         } catch (SQLException e){
             return new ResponseData<>(ErrorResponses.DataAccessError, null);
         }
-        return null;
+        return new ResponseData<>(null, new GameData(game, null, null, gameName, id));
     }
 
     public ResponseData<Collection<GameData>> getGames() {
-        return null;
+        ArrayList<GameData> rv = new ArrayList<>();
+        try(Connection conn = CustomizedDatabaseManager.getConnection().data()){
+            String statement = "SELECT * FROM games;";
+            try(PreparedStatement ps = conn.prepareStatement(statement)){
+                try(ResultSet rs = ps.executeQuery()){
+                    while(rs.next()){
+                        rv.add(readGameData(rs));
+                    }
+                }
+            }
+        } catch (SQLException e){
+            return new ResponseData<>(ErrorResponses.DataAccessError, null);
+        }
+        return new ResponseData<>(null, rv);
+    }
+
+    private GameData readGameData(ResultSet rs) throws SQLException{
+        ChessGame game = new Gson().fromJson(rs.getString("game"), ChessGame.class);
+        String userWhite = rs.getString("user_white");
+        String userBlack = rs.getString("user_black");
+        String name = rs.getString("name");
+        int id = rs.getInt("id");
+        return new GameData(game, userWhite, userBlack, name, id);
     }
 
     public ResponseData<GameData> getGameData(int gameID) {
-        return null;
+        try(Connection conn = CustomizedDatabaseManager.getConnection().data()){
+            String queryStatement = "SELECT * FROM games WHERE id = ?;";
+            try (PreparedStatement ps = conn.prepareStatement(queryStatement)) {
+                ps.setInt(1, gameID);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        return new ResponseData<>(null, readGameData(rs));
+                    } else {
+                        return new ResponseData<>(null, null);
+                    }
+                }
+            }
+        } catch (SQLException e){
+            return new ResponseData<>(ErrorResponses.DataAccessError, null);
+        }
     }
 
     public ErrorResponses joinGame(String username, boolean isWhite, int gameID) {

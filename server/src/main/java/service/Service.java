@@ -53,13 +53,11 @@ public class Service {
     }
 
     public static ResponseData<GameData> createGame(String authorization, String gameName) {
-        if(dataAccess.getAuthData(authorization) == null){
+        if(dataAccess.getAuthData(authorization).data() == null){
             return new ResponseData<>(ErrorResponses.InvalidAuthToken, null);
         }
 
-        GameData data = dataAccess.addGame(gameName).data();
-
-        return new ResponseData<>(null, data);
+        return dataAccess.addGame(gameName);
     }
 
     public static ErrorResponses joinGame(String authorization, boolean isWhite, int gameID) {
