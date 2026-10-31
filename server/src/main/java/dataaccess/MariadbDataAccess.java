@@ -24,16 +24,14 @@ public class MariadbDataAccess implements DataAccess{
         try(Connection conn = DatabaseManager.getConnection().data()){
             String statement = "DROP TABLE authTokens, games, users";
             try(PreparedStatement ps = conn.prepareStatement(statement)){
-                try(ResultSet rs = ps.executeQuery()){
-
-                }
+                ps.executeUpdate();
             }
 
         } catch (SQLException e){
-            DatabaseManager.createTables();
+            start();
             return ErrorResponses.DataAccessError;
         }
-        DatabaseManager.createTables();
+        start();
         return null;
     }
 
@@ -94,9 +92,7 @@ public class MariadbDataAccess implements DataAccess{
                 ps.setString(1, userData.username());
                 ps.setString(2, userData.email());
                 ps.setString(3, userData.password()); // TODO: HASH THE PASSWORD
-                try(ResultSet rs = ps.executeQuery()){
-
-                }
+                ps.executeUpdate();
             }
 
         } catch (SQLException e){
@@ -108,30 +104,39 @@ public class MariadbDataAccess implements DataAccess{
     }
 
     public ResponseData<AuthData> createAuthToken(String username) {
-        String tok = getNewAuthToken();
         try(Connection conn = DatabaseManager.getConnection().data()){
+            String queryStatement = "SELECT id FROM users WHERE username = ?;";
             String statement = "INSERT INTO authTokens (token, user_id) VALUES " +
-                    "(?, (SELECT id FROM users WHERE username = ?));";
-            try(PreparedStatement ps = conn.prepareStatement(statement)){
-                ps.setString(1, tok);
-                ps.setString(2, username);
-                try(ResultSet rs = ps.executeQuery()){
-                    if(rs.next()) {
-                        return new ResponseData<>(null, new AuthData(username, tok));
+                    "(?, ?);";
+            int queryResult;
+            String tok;
+            try(PreparedStatement ps = conn.prepareStatement(queryStatement)) {
+                ps.setString(1, username);
+                try(var rs = ps.executeQuery()){
+                    if(rs.next()){
+                        queryResult = rs.getInt("id");
+                        tok = getNewAuthTokenFromInt(queryResult);
+                    } else {
+                        return new ResponseData<>(null, null);
                     }
                 }
+            }
+            try(PreparedStatement ps = conn.prepareStatement(statement)){
+                ps.setString(1, tok);
+                ps.setInt(2, queryResult);
+                ps.executeUpdate();
+                return new ResponseData<>(null, new AuthData(username, tok));
+
             }
 
         } catch (SQLException e){
             return new ResponseData<>(ErrorResponses.DataAccessError, null);
         }
-        return new ResponseData<>(null, null);
+        // return new ResponseData<>(null, null); // Should be unreachable
     }
 
-    int tokenGen = 0;
-
-    private String getNewAuthToken (){
-        return "Auth: " + ++tokenGen;
+    private String getNewAuthTokenFromInt (int i){
+        return "Auth: " + i;
     }
 
     public ResponseData<AuthData> getAuthData(String token) {

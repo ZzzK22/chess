@@ -18,6 +18,10 @@ public class MemoryDataAccess implements DataAccess {
         return null;
     }
 
+    public ErrorResponses start() {
+        return null;
+    }
+
     public ResponseData<UserData> getUserByUsername(String username) {
         return new ResponseData<>(null, userData.get(username));
     }

@@ -6,6 +6,7 @@ import java.util.Collection;
 
 public interface DataAccess {
     ErrorResponses deleteAll();
+    ErrorResponses start();
 
     ResponseData<UserData> getUserByUsername(String username);
     ResponseData<UserData> getUserByEmail(String email);

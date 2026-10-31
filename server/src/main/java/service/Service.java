@@ -1,5 +1,7 @@
 package service;
 
+import dataaccess.DatabaseManager;
+import dataaccess.MariadbDataAccess;
 import server.*;
 import dataaccess.DataAccess;
 import dataaccess.MemoryDataAccess;
@@ -8,16 +10,21 @@ import java.util.Collection;
 import java.util.Objects;
 
 public class Service {
-    static DataAccess dataAccess = new MemoryDataAccess();
+    static DataAccess dataAccess = new MariadbDataAccess();
+    static{
+        dataAccess.start();
+    }
+
+
     public static void deleteAll(){
         dataAccess.deleteAll();
     }
 
     public static ResponseData<AuthData> register(UserData userData) {
-        if(dataAccess.getUserByEmail(userData.email()) != null){
+        if(dataAccess.getUserByEmail(userData.email()).data() != null){
             return new ResponseData<>(ErrorResponses.InvalidEmail, null);
         }
-        if (dataAccess.getUserByUsername(userData.username()) != null){
+        if (dataAccess.getUserByUsername(userData.username()).data() != null){
             return new ResponseData<>(ErrorResponses.InvalidUsername, null);
         }
         dataAccess.createUser(userData);

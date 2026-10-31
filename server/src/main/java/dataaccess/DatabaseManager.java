@@ -42,20 +42,20 @@ public class DatabaseManager {
         ErrorResponses error2 = createAuthTokenTable();
         ErrorResponses error3 = createGamesTable();
         return error1 == null &&
-               error2 == null &&
-               error3 == null ?
+                error2 == null &&
+                error3 == null ?
                 null
                 : ErrorResponses.DataAccessError;
     }
 
     static public ErrorResponses createUserTable() {
-        var statement = "CREATE TABLE users(" +
+        var statement = "CREATE TABLE IF NOT EXISTS users(" +
                 "id INT PRIMARY KEY AUTO_INCREMENT," +
                 "username VARCHAR(80) NOT NULL UNIQUE," +
                 "email VARCHAR(200) NOT NULL UNIQUE," +
-                "password VARCHAR(255) NOT NULL," +
+                "password VARCHAR(255) NOT NULL" +
                 ");";
-        try (var conn = DriverManager.getConnection(connectionUrl, dbUsername, dbPassword);
+        try (var conn = DatabaseManager.getConnection().data();
              var preparedStatement = conn.prepareStatement(statement)) {
             preparedStatement.executeUpdate();
         } catch (SQLException ex) {
@@ -65,7 +65,7 @@ public class DatabaseManager {
     }
 
     static public ErrorResponses createAuthTokenTable() {
-        var statement = "CREATE TABLE authTokens(" +
+        var statement = "CREATE TABLE IF NOT EXISTS authTokens(" +
                 "id INT PRIMARY KEY AUTO_INCREMENT," +
                 "user_id INT NOT NULL," +
                 "token VARCHAR(255) NOT NULL UNIQUE," +
@@ -73,17 +73,18 @@ public class DatabaseManager {
                 "FOREIGN KEY (user_id)" +
                 "REFERENCES users(id)" +
                 ");";
-        try (var conn = DriverManager.getConnection(connectionUrl, dbUsername, dbPassword);
+        try (var conn = DatabaseManager.getConnection().data();
              var preparedStatement = conn.prepareStatement(statement)) {
-            preparedStatement.executeUpdate();
+             preparedStatement.executeUpdate();
         } catch (SQLException ex) {
+            System.out.println(ex.getSQLState());
             return ErrorResponses.DataAccessError;
         }
         return null;
     }
 
     static public ErrorResponses createGamesTable() {
-        var statement = "CREATE TABLE games(" +
+        var statement = "CREATE TABLE IF NOT EXISTS games(" +
                 "id INT PRIMARY KEY AUTO_INCREMENT," +
                 "player_white INT NOT NULL," +
                 "player_black INT NOT NULL," +
@@ -94,7 +95,7 @@ public class DatabaseManager {
                 "FOREIGN KEY (player_black) " +
                 "REFERENCES users(id)" +
                 ");";
-        try (var conn = DriverManager.getConnection(connectionUrl, dbUsername, dbPassword);
+        try (var conn = DatabaseManager.getConnection().data();
              var preparedStatement = conn.prepareStatement(statement)) {
             preparedStatement.executeUpdate();
         } catch (SQLException ex) {
