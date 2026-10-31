@@ -51,7 +51,11 @@ public class Service {
     }
 
     public static ResponseData<AuthData> login(UserData userData) {
-        UserData data = dataAccess.getUserByUsername(userData.username()).data();
+        ResponseData<UserData> userResponse = dataAccess.getUserByUsername(userData.username());
+        if(userResponse.error() != null){
+            return new ResponseData<>(userResponse.error(), null);
+        }
+        UserData data = userResponse.data();
         if(userData.username() == null || data == null){
             return new ResponseData<>(ErrorResponses.InvalidUsername, null);
         }
@@ -63,7 +67,11 @@ public class Service {
     }
 
     public static ResponseData<Collection<GameData>> listGames(String authorization) {
-        if(dataAccess.getAuthData(authorization).data() == null){
+        ResponseData<AuthData> responseData = dataAccess.getAuthData(authorization);
+        if(responseData.error() != null){
+            return new ResponseData<>(responseData.error(), null);
+        }
+        if(responseData.data() == null){
             return new ResponseData<>(ErrorResponses.InvalidAuthToken, null);
         }
         return dataAccess.getGames(); // getGames returns a ResponseData
@@ -96,7 +104,6 @@ public class Service {
         if(isWhite && data.whiteUsername() != null || !isWhite && data.blackUsername() != null){
             return ErrorResponses.InvalidColor;
         }
-        dataAccess.joinGame(authResponse.data().username(), isWhite, gameID);
-        return null;
+        return dataAccess.joinGame(authResponse.data().username(), isWhite, gameID);
     }
 }
