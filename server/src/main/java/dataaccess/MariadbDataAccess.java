@@ -54,7 +54,6 @@ public class MariadbDataAccess implements DataAccess{
     }
 
     private UserData readUser(ResultSet rs) throws SQLException{
-        int id = rs.getInt("id");
         String username = rs.getString("username");
         String email = rs.getString("email");
         return new UserData(username, null, email);
@@ -96,10 +95,8 @@ public class MariadbDataAccess implements DataAccess{
             }
 
         } catch (SQLException e){
-            DatabaseManager.createTables();
             return ErrorResponses.DataAccessError;
         }
-        DatabaseManager.createTables();
         return null;
     }
 

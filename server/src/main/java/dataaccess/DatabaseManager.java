@@ -49,7 +49,12 @@ public class DatabaseManager {
     }
 
     static public ErrorResponses createUserTable() {
-        var statement = "";
+        var statement = "CREATE TABLE IF NOT EXISTS users (" +
+                "id INT PRIMARY KEY AUTO_INCREMENT," +
+                "username VARCHAR(100) UNIQUE NOT NULL," +
+                "email varchar(255) UNIQUE NOT NULL," +
+                "password varchar(255) NOT NULL" +
+                ");";
         try (var conn = DatabaseManager.getConnection().data();
              var preparedStatement = conn.prepareStatement(statement)) {
             preparedStatement.executeUpdate();
@@ -60,7 +65,14 @@ public class DatabaseManager {
     }
 
     static public ErrorResponses createAuthTokenTable() {
-        var statement = "";
+        var statement = "CREATE TABLE IF NOT EXISTS authTokens(" +
+                "id INT PRIMARY KEY AUTO_INCREMENT," +
+                "user_id INT NOT NULL," +
+                "token VARCHAR(255) NOT NULL UNIQUE," +
+                "" +
+                "FOREIGN KEY (user_id)" +
+                "REFERENCES users (id)" +
+                ")";
         try (var conn = DatabaseManager.getConnection().data();
              var preparedStatement = conn.prepareStatement(statement)) {
              preparedStatement.executeUpdate();
@@ -72,7 +84,17 @@ public class DatabaseManager {
     }
 
     static public ErrorResponses createGamesTable() {
-        var statement = "";
+        var statement = "CREATE TABLE games(" +
+                "id INT PRIMARY KEY AUTO_INCREMENT," +
+                "player_white INT," +
+                "player_black INT," +
+                "game_data TEXT," +
+                "" +
+                "FOREIGN KEY (player_white)" +
+                "REFERENCES users (id)," +
+                "FOREIGN KEY (player_black)" +
+                "REFERENCES users (id)" +
+                ")";
         try (var conn = DatabaseManager.getConnection().data();
              var preparedStatement = conn.prepareStatement(statement)) {
             preparedStatement.executeUpdate();
