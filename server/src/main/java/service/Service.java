@@ -19,13 +19,24 @@ public class Service {
     }
 
     public static ResponseData<AuthData> register(UserData userData) {
-        if(dataAccess.getUserByEmail(userData.email()).data() != null){
+        ResponseData<UserData> userFromEmail = dataAccess.getUserByEmail(userData.email());
+        ResponseData<UserData> userFromUsername = dataAccess.getUserByUsername(userData.username());
+        if(userFromEmail.error() != null){
+            return new ResponseData<>(userFromEmail.error(), null);
+        }
+        if(userFromUsername.error() != null){
+            return new ResponseData<>(userFromUsername.error(), null);
+        }
+        if(userFromEmail.data() != null){
             return new ResponseData<>(ErrorResponses.InvalidEmail, null);
         }
-        if (dataAccess.getUserByUsername(userData.username()).data() != null){
+        if (userFromUsername.data() != null){
             return new ResponseData<>(ErrorResponses.InvalidUsername, null);
         }
-        dataAccess.createUser(userData);
+        ErrorResponses error = dataAccess.createUser(userData);
+        if(error != null){
+            return new ResponseData<>(error, null);
+        }
         return dataAccess.createAuthToken(userData.username());
     }
 
