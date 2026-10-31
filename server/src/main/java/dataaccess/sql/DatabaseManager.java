@@ -1,5 +1,6 @@
-package dataaccess;
+package dataaccess.sql;
 
+import dataaccess.DataAccessException;
 import server.ErrorResponses;
 
 import java.sql.*;

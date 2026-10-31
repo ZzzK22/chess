@@ -1,7 +1,8 @@
-package dataaccess;
+package dataaccess.sql;
 
 import chess.ChessGame;
 import com.google.gson.Gson;
+import dataaccess.DataAccess;
 import server.*;
 
 import java.sql.Connection;
@@ -11,7 +12,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class MariadbDataAccess implements DataAccess{
+public class MariadbDataAccess implements DataAccess {
 
     public ErrorResponses start(){
         ErrorResponses error1 = DatabaseManager.createDatabase();

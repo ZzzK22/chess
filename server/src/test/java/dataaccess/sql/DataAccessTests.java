@@ -1,6 +1,5 @@
-package dataacces.sql;
+package dataaccess.sql;
 
-import dataaccess.MariadbDataAccess;
 import org.junit.jupiter.api.*;
 import server.UserData;
 

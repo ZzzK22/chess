@@ -1,12 +1,11 @@
 package service;
 
-import dataaccess.MariadbDataAccess;
+import dataaccess.sql.MariadbDataAccess;
 import org.mindrot.jbcrypt.BCrypt;
 import server.*;
 import dataaccess.DataAccess;
 
 import java.util.Collection;
-import java.util.Objects;
 
 public class Service {
     static DataAccess dataAccess = new MariadbDataAccess();
