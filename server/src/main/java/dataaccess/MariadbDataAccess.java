@@ -97,7 +97,7 @@ public class MariadbDataAccess implements DataAccess{
             try(PreparedStatement ps = conn.prepareStatement(statement)){
                 ps.setString(1, userData.username());
                 ps.setString(2, userData.email());
-                ps.setString(3, userData.password()); // TODO: HASH THE PASSWORD
+                ps.setString(3, userData.password());
                 ps.executeUpdate();
             }
 
