@@ -14,8 +14,8 @@ import java.util.Collection;
 public class MariadbDataAccess implements DataAccess{
 
     public ErrorResponses start(){
-        ErrorResponses error1 = CustomizedDatabaseManager.createDatabase();
-        ErrorResponses error2 = CustomizedDatabaseManager.createTables();
+        ErrorResponses error1 = DatabaseManager.createDatabase();
+        ErrorResponses error2 = DatabaseManager.createTables();
         return error1 == null &&
                 error2 == null ?
                 null
@@ -24,7 +24,7 @@ public class MariadbDataAccess implements DataAccess{
 
 
     public ErrorResponses deleteAll() {
-        try(Connection conn = CustomizedDatabaseManager.getConnection().data()){
+        try(Connection conn = DatabaseManager.getConnection()){
             for (String i : new String[]{"authTokens", "games"}){
                 String statement = "TRUNCATE TABLE " + i + ";";
                 try (PreparedStatement ps = conn.prepareStatement(statement)) {
@@ -43,7 +43,7 @@ public class MariadbDataAccess implements DataAccess{
     }
 
     public ResponseData<UserData> getUserByUsername(String username) {
-        try(Connection conn = CustomizedDatabaseManager.getConnection().data()){
+        try(Connection conn = DatabaseManager.getConnection()){
             String statement = "SELECT username, email, password FROM users WHERE username=?";
             try(PreparedStatement ps = conn.prepareStatement(statement)){
                 ps.setString(1, username);
@@ -74,7 +74,7 @@ public class MariadbDataAccess implements DataAccess{
     }
 
     public ResponseData<UserData> getUserByEmail(String email) {
-        try(Connection conn = CustomizedDatabaseManager.getConnection().data()){
+        try(Connection conn = DatabaseManager.getConnection()){
             String statement = "SELECT username, email, password FROM users WHERE email=?";
             try(PreparedStatement ps = conn.prepareStatement(statement)){
                 ps.setString(1, email);
@@ -92,7 +92,7 @@ public class MariadbDataAccess implements DataAccess{
     }
 
     public ErrorResponses createUser(UserData userData) {
-        try(Connection conn = CustomizedDatabaseManager.getConnection().data()){
+        try(Connection conn = DatabaseManager.getConnection()){
             String statement = "INSERT INTO users (username, email, password) VALUES (?, ?, ?)";
             try(PreparedStatement ps = conn.prepareStatement(statement)){
                 ps.setString(1, userData.username());
@@ -108,7 +108,7 @@ public class MariadbDataAccess implements DataAccess{
     }
 
     public ResponseData<AuthData> createAuthToken(String username) {
-        try(Connection conn = CustomizedDatabaseManager.getConnection().data()){
+        try(Connection conn = DatabaseManager.getConnection()){
             String queryStatement = "SELECT id FROM users WHERE username = ?;";
             String statement = "INSERT INTO authTokens (token, user_id) VALUES " +
                     "(?, ?);";
@@ -153,7 +153,7 @@ public class MariadbDataAccess implements DataAccess{
     }
 
     public ResponseData<AuthData> getAuthData(String token) {
-        try(Connection conn = CustomizedDatabaseManager.getConnection().data()){
+        try(Connection conn = DatabaseManager.getConnection()){
             String statement = "SELECT token, username FROM authTokens JOIN users ON users.id = authTokens.user_id WHERE token = ?;";
             try(PreparedStatement ps = conn.prepareStatement(statement)){
                 ps.setString(1, token);
@@ -171,7 +171,7 @@ public class MariadbDataAccess implements DataAccess{
     }
 
     public ErrorResponses logout(String authToken) {
-        try(Connection conn = CustomizedDatabaseManager.getConnection().data()){
+        try(Connection conn = DatabaseManager.getConnection()){
             String queryStatement = "SELECT * FROM authTokens WHERE token = ?;";
             try (PreparedStatement ps = conn.prepareStatement(queryStatement)) {
                 ps.setString(1, authToken);
@@ -196,7 +196,7 @@ public class MariadbDataAccess implements DataAccess{
     public ResponseData<GameData> addGame(String gameName) {
         ChessGame game = new ChessGame();
         int id;
-        try(Connection conn = CustomizedDatabaseManager.getConnection().data()){
+        try(Connection conn = DatabaseManager.getConnection()){
             String statement = "INSERT INTO games (name, game_data) VALUES (?, ?);";
             String queryStatement = "SELECT LAST_INSERT_ID();";
             try(PreparedStatement ps = conn.prepareStatement(statement)){
@@ -219,7 +219,7 @@ public class MariadbDataAccess implements DataAccess{
 
     public ResponseData<Collection<GameData>> getGames() {
         ArrayList<GameData> rv = new ArrayList<>();
-        try(Connection conn = CustomizedDatabaseManager.getConnection().data()){
+        try(Connection conn = DatabaseManager.getConnection()){
             String statement = "SELECT game_data, white.username, black.username, name, games.id FROM games " +
                     "LEFT JOIN users AS white ON player_white = white.id " +
                     "LEFT JOIN users AS black ON player_black = black.id;";
@@ -246,7 +246,7 @@ public class MariadbDataAccess implements DataAccess{
     }
 
     public ResponseData<GameData> getGameData(int gameID) {
-        try(Connection conn = CustomizedDatabaseManager.getConnection().data()){
+        try(Connection conn = DatabaseManager.getConnection()){
             String queryStatement = "SELECT game_data, white.username, black.username, name, games.id FROM games " +
                     "LEFT JOIN users AS white ON player_white = white.id " +
                     "LEFT JOIN users AS black ON player_black = black.id " +
@@ -267,7 +267,7 @@ public class MariadbDataAccess implements DataAccess{
     }
 
     public ErrorResponses joinGame(String username, boolean isWhite, int gameID) {
-        try(Connection conn = CustomizedDatabaseManager.getConnection().data()){
+        try(Connection conn = DatabaseManager.getConnection()){
             String statement = "UPDATE games SET player_" + (isWhite ? "white" : "black") +
                     " = (SELECT id FROM users WHERE username = ?) WHERE id = ?";
             try(PreparedStatement ps = conn.prepareStatement(statement)){
