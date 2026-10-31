@@ -46,7 +46,7 @@ public class Service {
     }
 
     public static ResponseData<Collection<GameData>> listGames(String authorization) {
-        if(dataAccess.getAuthData(authorization) == null){
+        if(dataAccess.getAuthData(authorization).data() == null){
             return new ResponseData<>(ErrorResponses.InvalidAuthToken, null);
         }
         return dataAccess.getGames(); // getGames returns a ResponseData
@@ -61,7 +61,11 @@ public class Service {
     }
 
     public static ErrorResponses joinGame(String authorization, boolean isWhite, int gameID) {
-        if(dataAccess.getAuthData(authorization) == null){
+        ResponseData<AuthData> authResponse = dataAccess.getAuthData(authorization);
+        if(authResponse.error() != null){
+            return authResponse.error();
+        }
+        if(authResponse.data() == null){
             return ErrorResponses.InvalidAuthToken;
         }
         GameData data = dataAccess.getGameData(gameID).data();
@@ -71,7 +75,7 @@ public class Service {
         if(isWhite && data.whiteUsername() != null || !isWhite && data.blackUsername() != null){
             return ErrorResponses.InvalidColor;
         }
-        dataAccess.joinGame(dataAccess.getAuthData(authorization).data().username(), isWhite, gameID);
+        dataAccess.joinGame(authResponse.data().username(), isWhite, gameID);
         return null;
     }
 }

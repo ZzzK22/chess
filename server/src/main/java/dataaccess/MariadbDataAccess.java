@@ -220,7 +220,9 @@ public class MariadbDataAccess implements DataAccess{
     public ResponseData<Collection<GameData>> getGames() {
         ArrayList<GameData> rv = new ArrayList<>();
         try(Connection conn = CustomizedDatabaseManager.getConnection().data()){
-            String statement = "SELECT * FROM games;";
+            String statement = "SELECT game_data, white.username, black.username, name, games.id FROM games " +
+                    "LEFT JOIN users AS white ON player_white = white.id " +
+                    "LEFT JOIN users AS black ON player_black = black.id;";
             try(PreparedStatement ps = conn.prepareStatement(statement)){
                 try(ResultSet rs = ps.executeQuery()){
                     while(rs.next()){
@@ -235,17 +237,20 @@ public class MariadbDataAccess implements DataAccess{
     }
 
     private GameData readGameData(ResultSet rs) throws SQLException{
-        ChessGame game = new Gson().fromJson(rs.getString("game"), ChessGame.class);
-        String userWhite = rs.getString("user_white");
-        String userBlack = rs.getString("user_black");
+        ChessGame game = new Gson().fromJson(rs.getString("game_data"), ChessGame.class);
+        String userWhite = rs.getString(2);
+        String userBlack = rs.getString(3);
         String name = rs.getString("name");
-        int id = rs.getInt("id");
+        int id = rs.getInt(5);
         return new GameData(game, userWhite, userBlack, name, id);
     }
 
     public ResponseData<GameData> getGameData(int gameID) {
         try(Connection conn = CustomizedDatabaseManager.getConnection().data()){
-            String queryStatement = "SELECT * FROM games WHERE id = ?;";
+            String queryStatement = "SELECT game_data, white.username, black.username, name, games.id FROM games " +
+                    "LEFT JOIN users AS white ON player_white = white.id " +
+                    "LEFT JOIN users AS black ON player_black = black.id " +
+                    "WHERE games.id = ?;";
             try (PreparedStatement ps = conn.prepareStatement(queryStatement)) {
                 ps.setInt(1, gameID);
                 try (ResultSet rs = ps.executeQuery()) {
@@ -262,6 +267,18 @@ public class MariadbDataAccess implements DataAccess{
     }
 
     public ErrorResponses joinGame(String username, boolean isWhite, int gameID) {
+        try(Connection conn = CustomizedDatabaseManager.getConnection().data()){
+            String statement = "UPDATE games SET player_" + (isWhite ? "white" : "black") +
+                    " = (SELECT id FROM users WHERE username = ?) WHERE id = ?";
+            try(PreparedStatement ps = conn.prepareStatement(statement)){
+                ps.setString(1, username);
+                ps.setInt(2, gameID);
+                ps.executeUpdate();
+            }
+
+        } catch (SQLException e){
+            return ErrorResponses.DataAccessError;
+        }
         return null;
     }
 }

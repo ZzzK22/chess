@@ -43,6 +43,9 @@ public class Server {
         if(error == ErrorResponses.InvalidColor){
             ctx.status(403);
             ctx.result("{\"message\": \"Error: Player color already taken!\"}");
+        }else if (error == ErrorResponses.GameExistsnt){
+            ctx.status(403);
+            ctx.result("{\"message\": \"Error: That game existsn't!\"}");
         }
     }
 
