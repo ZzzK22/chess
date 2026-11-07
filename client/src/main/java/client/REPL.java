@@ -62,5 +62,12 @@ public class REPL {
     }
 
     private static void displayLoggedInOptions() {
+        printColoredOption("create <NAME>", "create game");
+        printColoredOption("list", "list games");
+        printColoredOption("join <ID> (WHITE|BLACK)", "join game");
+        printColoredOption("observe <ID>", "observe game");
+        printColoredOption("logout", "log out of your account");
+        printColoredOption("quit", "quit the program");
+        printColoredOption("help", "display this help screen");
     }
 }
