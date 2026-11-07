@@ -3,11 +3,16 @@ package client;
 import java.util.Objects;
 import java.util.Scanner;
 
+import static ui.EscapeSequences.RESET_TEXT_COLOR;
+import static ui.EscapeSequences.SET_TEXT_COLOR_BLUE;
+
 public class REPL {
     private static String username = null;
     private static String authToken = null;
     private static boolean loggedIn = false;
-    public static void run (){
+    private static ServerFacade serverFacade;
+    public static void run (int port){
+        serverFacade = new ServerFacade(port);
         Scanner stdin = new Scanner(System.in);
         while(true) {
             loggedIn = username != null;
@@ -25,6 +30,7 @@ public class REPL {
                 } else {
                     displayLoggedOutOptions();
                 }
+                continue;
             }
             System.out.println(in);
         }
@@ -36,11 +42,23 @@ public class REPL {
     }
 
     private static void logout() {
-        ServerFacade.logout(authToken);
+        serverFacade.logout(authToken);
+    }
+
+    private static void printColoredOption(String blueText, String blackText){
+        System.out.print(SET_TEXT_COLOR_BLUE);
+        System.out.print(blueText);
+        System.out.print(RESET_TEXT_COLOR);
+        System.out.print(" - ");
+        System.out.print(blackText);
+        System.out.println();
     }
 
     private static void displayLoggedOutOptions(){
-        System.out.println("");
+        printColoredOption("register <USERNAME> <PASSWORD> <EMAIL>", "create an account");
+        printColoredOption("login <USERNAME> <PASSWORD>", "log in to your account");
+        printColoredOption("quit", "quit the program");
+        printColoredOption("help", "display this help screen");
     }
 
     private static void displayLoggedInOptions() {

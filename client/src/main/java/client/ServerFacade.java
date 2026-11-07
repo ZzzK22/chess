@@ -1,7 +1,11 @@
 package client;
 
 public class ServerFacade {
-    public static void logout(String authToken) {
+    public ServerFacade(int port){
+
+    }
+
+    public void logout(String authToken) {
 
     }
 }
