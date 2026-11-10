@@ -1,6 +1,7 @@
 package client;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Scanner;
 
 import static ui.EscapeSequences.RESET_TEXT_COLOR;
@@ -16,7 +17,7 @@ public class REPL {
         Scanner stdin = new Scanner(System.in);
         while(true) {
             loggedIn = username != null;
-            System.out.print("[" + (username == null ? "LOGGED OUT" : username) + "] $:: ");
+            System.out.print("[" + (Optional.ofNullable(username).orElse("LOGGED OUT")) + "] $:: ");
             String in = stdin.next();
             if(theyHavePut(in, "quit")){
                 if(loggedIn){
@@ -32,9 +33,18 @@ public class REPL {
                 }
                 continue;
             }
+            login("username", "password");
             System.out.println(in);
         }
 
+    }
+
+    private static String login(String username, String password){
+        try {
+            return serverFacade.login(username, password);
+        } catch (Exception _) {
+        }
+        return null;
     }
 
     private static boolean theyHavePut(Object in, Object b){
