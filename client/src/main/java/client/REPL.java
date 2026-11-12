@@ -1,6 +1,7 @@
 package client;
 
 import shared.AuthData;
+import shared.ErrorResponses;
 import shared.ResponseData;
 import ui.EscapeSequences;
 
@@ -84,6 +85,24 @@ public class REPL {
                 }
                 continue;
             }
+            if(theyHavePut(in, "logout")){
+                if(!loggedIn){
+                    System.out.print(EscapeSequences.SET_TEXT_COLOR_RED);
+                    System.out.println("You're already logged out!");
+                    System.out.print(EscapeSequences.RESET_TEXT_COLOR);
+                    continue;
+                }
+                var error = logout();
+                switch (error) {
+                    case null -> System.out.println("Logged out successfully!");
+                    case InvalidAuthToken -> System.out.println("Bad authorization");
+                    default -> System.out.println("Something went Wrong!");
+                }
+                username = null;
+                authToken = null;
+                continue;
+
+            }
             System.out.println(in);
         }
 
@@ -110,8 +129,8 @@ public class REPL {
         return Objects.equals(in, b);
     }
 
-    private static void logout() {
-        serverFacade.logout(authToken);
+    private static ErrorResponses logout() {
+        return serverFacade.logout(authToken);
     }
 
     private static void printColoredOption(String blueText, String blackText){

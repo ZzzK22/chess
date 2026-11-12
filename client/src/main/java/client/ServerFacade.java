@@ -22,8 +22,8 @@ public class ServerFacade {
         this.url = "http://" + url + ":" + port;
     }
 
-    public void logout(String authToken) {
-
+    public ErrorResponses logout(String authToken) {
+        var response = sendRequest(Method.DELETE, url + "/session", null, authToken);
     }
 
     public ResponseData<AuthData> register(String username, String password, String email) {
@@ -66,6 +66,10 @@ public class ServerFacade {
         } else {
             return ErrorResponses.DataAccessError;
         }
+    }
+
+    private ResponseData<HttpResponse<String>> sendRequest(Method method, String url) {
+        return sendRequest(method, url, null);
     }
 
     public ResponseData<HttpResponse<String>> sendRequest(Method method, String url, String request){
