@@ -24,6 +24,10 @@ public class ServerFacade {
 
     public ErrorResponses logout(String authToken) {
         var response = sendRequest(Method.DELETE, url + "/session", null, authToken);
+        if(response.data().statusCode() == 200){
+            return null;
+        }
+        return getErrorFromErrorMessage(response.data().body());
     }
 
     public ResponseData<AuthData> register(String username, String password, String email) {
@@ -71,10 +75,16 @@ public class ServerFacade {
     private ResponseData<HttpResponse<String>> sendRequest(Method method, String url) {
         return sendRequest(method, url, null);
     }
+    private ResponseData<HttpResponse<String>> sendRequest(Method method, String url, String request) {
+        return sendRequest(method, url, request, null);
+    }
 
-    public ResponseData<HttpResponse<String>> sendRequest(Method method, String url, String request){
+    public ResponseData<HttpResponse<String>> sendRequest(Method method, String url, String request, String auth){
         try {
             HttpRequest.Builder builder = HttpRequest.newBuilder().uri(new URI(url));
+            if(auth != null){
+                builder.header("authorization", auth);
+            }
             switch(method){
                 case GET -> builder.GET();
                 case PUT -> builder.PUT(HttpRequest.BodyPublishers.ofString(request));

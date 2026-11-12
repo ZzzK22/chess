@@ -41,6 +41,12 @@ public class REPL {
                 continue;
             }
             if(theyHavePut(in, "login")){
+                if(loggedIn){
+                    System.out.print(EscapeSequences.SET_TEXT_COLOR_RED);
+                    System.out.println("You're already logged in as " + username);
+                    System.out.print(EscapeSequences.RESET_TEXT_COLOR);
+                    continue;
+                }
                 if(input.length < 3){
                     System.out.print(EscapeSequences.SET_TEXT_COLOR_RED);
                     System.out.println("Must provide username and password!");
@@ -63,6 +69,12 @@ public class REPL {
                 continue;
             }
             if(theyHavePut(in, "register")){
+                if(loggedIn){
+                    System.out.print(EscapeSequences.SET_TEXT_COLOR_RED);
+                    System.out.println("You're already logged in as " + username);
+                    System.out.print(EscapeSequences.RESET_TEXT_COLOR);
+                    continue;
+                }
                 if(input.length < 4){
                     System.out.print(EscapeSequences.SET_TEXT_COLOR_RED);
                     System.out.println("Must provide username and password and email!");
