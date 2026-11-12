@@ -26,14 +26,46 @@ public class ServerFacade {
 
     }
 
+    public ResponseData<AuthData> register(String username, String password, String email) {
+        String request = String.format("{\"username\": \"%s\", \"password\": \"%s\", \"email\": \"%s\"}", username, password, email);
+        var response = sendRequest(Method.POST, url + "/user", request);
+        if (response.error() != null){
+            return new ResponseData<>(response.error(), null);
+        }
+        if(response.data().statusCode() == 200) {
+            return new ResponseData<>(null, new Gson().fromJson(response.data().body(), AuthData.class));
+        }
+        return new ResponseData<>(getErrorFromErrorMessage(response.data().body()), null);
+    }
+
     public ResponseData<AuthData> login(String username, String password){
         String request = String.format("{\"username\": \"%s\", \"password\": \"%s\"}", username, password);
         var response = sendRequest(Method.POST, url + "/session", request);
         if (response.error() != null){
             return new ResponseData<>(response.error(), null);
         }
-        return new ResponseData<>(null, new Gson().fromJson(response.data().body(), AuthData.class));
+        if(response.data().statusCode() == 200) {
+            return new ResponseData<>(null, new Gson().fromJson(response.data().body(), AuthData.class));
+        }
+        return new ResponseData<>(getErrorFromErrorMessage(response.data().body()), null);
+    }
 
+    private static ErrorResponses getErrorFromErrorMessage(String body) {
+        if(body.contains("email")){
+            return ErrorResponses.InvalidEmail;
+        } else if (body.contains("username")) {
+            return ErrorResponses.InvalidUsername;
+        } else if (body.contains("password")) {
+            return ErrorResponses.InvalidPassword;
+        } else if (body.contains("color")) {
+            return ErrorResponses.InvalidColor;
+        } else if (body.contains("game")) {
+            return ErrorResponses.GameExistsnt;
+        } else if (body.contains("authorization")) {
+            return ErrorResponses.InvalidAuthToken;
+        } else {
+            return ErrorResponses.DataAccessError;
+        }
     }
 
     public ResponseData<HttpResponse<String>> sendRequest(Method method, String url, String request){

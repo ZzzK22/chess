@@ -121,6 +121,11 @@ public class Server {
             ctx.result("{\"message\": \"Error: Username is a required field! (register)\"}");
             return;
         }
+        if(userData.email() == null){
+            ctx.status(400);
+            ctx.result("{\"message\": \"Error: Email is a required field! (register)\"}");
+            return;
+        }
         if(userData.password() == null){
             ctx.status(400);
             ctx.result("{\"message\": \"Error: Password is a required field! (register)\"}");

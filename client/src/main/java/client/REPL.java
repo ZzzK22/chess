@@ -59,6 +59,30 @@ public class REPL {
                     username = response.data().username();
                     System.out.println("You are now logged in as " + username);
                 }
+                continue;
+            }
+            if(theyHavePut(in, "register")){
+                if(input.length < 4){
+                    System.out.print(EscapeSequences.SET_TEXT_COLOR_RED);
+                    System.out.println("Must provide username and password and email!");
+                    System.out.print(EscapeSequences.SET_TEXT_COLOR_BLUE);
+                    System.out.println("Usage: register <username> <password> <email>");
+                    System.out.print(EscapeSequences.RESET_TEXT_COLOR);
+                }
+                var response = register(input[1], input[2], input[3]);
+                if(response.error() != null){
+                    switch(response.error()){
+                        case InvalidUsername -> System.out.println("Username already taken!");
+                        case InvalidEmail -> System.out.println("You've already signed up using that email!");
+                        case MajorError -> System.out.println("Something went wrong internally. Try again later!");
+                        default -> System.out.println("Something went wrong! try again later!");
+                    }
+                } else {
+                    authToken = response.data().authToken();
+                    username = response.data().username();
+                    System.out.println("You are now logged in as " + username);
+                }
+                continue;
             }
             System.out.println(in);
         }
@@ -67,6 +91,15 @@ public class REPL {
 
     private static ResponseData<AuthData> login(String username, String password){
         var response = serverFacade.login(username, password);
+        if(response.error() != null){
+            return new ResponseData<>(response.error(), null);
+        }
+
+        return response;
+    }
+
+    private static ResponseData<AuthData> register(String username, String password, String email){
+        var response = serverFacade.register(username, password, email);
         if(response.error() != null){
             return new ResponseData<>(response.error(), null);
         }
