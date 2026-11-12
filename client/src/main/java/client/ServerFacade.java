@@ -54,6 +54,18 @@ public class ServerFacade {
         return new ResponseData<>(getErrorFromErrorMessage(response.data().body()), null);
     }
 
+    public ResponseData<Integer> createGame(String name, String auth) {
+        String request = String.format("{\"gameName\": \"%s\"}", name);
+        var response = sendRequest(Method.POST, url + "/game", request, auth);
+        if(response.error() != null){
+            return new ResponseData<>(response.error(), null);
+        }
+        if(response.data().statusCode() == 200) {
+            return new ResponseData<>(null, new Gson().fromJson(response.data().body(), GameData.class).gameID());
+        }
+        return new ResponseData<>(getErrorFromErrorMessage(response.data().body()), null);
+    }
+
     private static ErrorResponses getErrorFromErrorMessage(String body) {
         if(body.contains("email")){
             return ErrorResponses.InvalidEmail;

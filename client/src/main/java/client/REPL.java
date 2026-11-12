@@ -59,6 +59,7 @@ public class REPL {
                     System.out.print(EscapeSequences.SET_TEXT_COLOR_BLUE);
                     System.out.println("Usage: login <username> <password>");
                     System.out.print(EscapeSequences.RESET_TEXT_COLOR);
+                    continue;
                 }
                 var response = login(input[1], input[2]);
                 if(response.error() != null){
@@ -87,6 +88,7 @@ public class REPL {
                     System.out.print(EscapeSequences.SET_TEXT_COLOR_BLUE);
                     System.out.println("Usage: register <username> <password> <email>");
                     System.out.print(EscapeSequences.RESET_TEXT_COLOR);
+                    continue;
                 }
                 var response = register(input[1], input[2], input[3]);
                 if(response.error() != null){
@@ -121,18 +123,43 @@ public class REPL {
                 continue;
 
             }
-            System.out.println(in);
+            if(theyHavePut(in, "create")) {
+                if (!loggedIn) {
+                    System.out.print(EscapeSequences.SET_TEXT_COLOR_RED);
+                    System.out.println("You're not logged in!");
+                    System.out.print(EscapeSequences.RESET_TEXT_COLOR);
+                    continue;
+                }
+                if(input.length < 2){
+                    System.out.print(EscapeSequences.SET_TEXT_COLOR_RED);
+                    System.out.println("Must provide game name!");
+                    System.out.print(EscapeSequences.SET_TEXT_COLOR_BLUE);
+                    System.out.println("Usage: create <name>");
+                    System.out.print(EscapeSequences.RESET_TEXT_COLOR);
+                    continue;
+                }
+                String name = input[1];
+                var response = createGame(name);
+                if(response.error() != null){
+                    System.out.println("Something went wrong!");
+                    continue;
+                }
+
+            }
+            System.out.print(EscapeSequences.SET_TEXT_COLOR_RED);
+            System.out.println("Unknown command \"" + in + "\"");
+            System.out.print(EscapeSequences.RESET_TEXT_COLOR);
+            System.out.println("Type help for options");
         }
 
     }
 
-    private static ResponseData<AuthData> login(String username, String password){
-        var response = serverFacade.login(username, password);
-        if(response.error() != null){
-            return new ResponseData<>(response.error(), null);
-        }
+    private static ResponseData<Integer> createGame(String name) {
+        return serverFacade.createGame(name, authToken);
+    }
 
-        return response;
+    private static ResponseData<AuthData> login(String username, String password){
+        return serverFacade.login(username, password);
     }
 
     private static ResponseData<AuthData> register(String username, String password, String email){
@@ -180,7 +207,9 @@ public class REPL {
     private static void drawBoard(ChessBoard board, boolean whitePerspective){
         int direction = whitePerspective ? -1 : 1;
         int start = whitePerspective ? 8 : 1;
-        System.out.print(SET_TEXT_BOLD);
+        System.out.print(SET_TEXT_BOLD + SET_TEXT_COLOR_WHITE + SET_BG_COLOR_DARK_GREEN);
+        String letters = whitePerspective ? "    a  b  c  d  e  f  g  h    " : "    h  g  f  e  d  c  b  a    ";
+        System.out.println(letters);
         for(int i = start; i < 9 && i > 0; i += direction){
             for(int j = 9 - start; j < 9 && j > 0; j -= direction){
                 char pieceChar = ' ';
@@ -207,6 +236,7 @@ public class REPL {
             }
             System.out.println(EscapeSequences.RESET_BG_COLOR);
         }
+        System.out.println(letters);
         System.out.print(RESET_TEXT_BOLD_FAINT);
     }
 }
