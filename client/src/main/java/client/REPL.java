@@ -1,5 +1,9 @@
 package client;
 
+import shared.AuthData;
+import shared.ResponseData;
+import ui.EscapeSequences;
+
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Scanner;
@@ -18,7 +22,9 @@ public class REPL {
         while(true) {
             loggedIn = username != null;
             System.out.print("[" + (Optional.ofNullable(username).orElse("LOGGED OUT")) + "] $:: ");
-            String in = stdin.next();
+            String received = stdin.nextLine();
+            String[] input = received.split(" ", 0);
+            String in = input[0];
             if(theyHavePut(in, "quit")){
                 if(loggedIn){
                     logout();
@@ -33,18 +39,38 @@ public class REPL {
                 }
                 continue;
             }
-            login("username", "password");
+            if(theyHavePut(in, "login")){
+                if(input.length < 3){
+                    System.out.print(EscapeSequences.SET_TEXT_COLOR_RED);
+                    System.out.println("Must provide username and password!");
+                    System.out.print(EscapeSequences.SET_TEXT_COLOR_BLUE);
+                    System.out.println("Usage: login <username> <password>");
+                    System.out.print(EscapeSequences.RESET_TEXT_COLOR);
+                }
+                var response = login(input[1], input[2]);
+                if(response.error() != null){
+                    switch(response.error()){
+                        case InvalidUsername, InvalidPassword -> System.out.println("Incorrect username or password!");
+                        case MajorError -> System.out.println("Something went wrong internally. Try again later!");
+                        default -> System.out.println("Something went wrong! try again later!");
+                    }
+                } else {
+                    authToken = response.data().authToken();
+                    username = response.data().username();
+                    System.out.println("You are now logged in as " + username);
+                }
+            }
             System.out.println(in);
         }
 
     }
 
-    private static String login(String username, String password){
-        try {
-            return serverFacade.login(username, password);
-        } catch (Exception _) {
+    private static ResponseData<AuthData> login(String username, String password){
+        var response = serverFacade.login(username, password);
+        if(response.error() != null){
+            return new ResponseData<>(response.error(), null);
         }
-        return null;
+        return response;
     }
 
     private static boolean theyHavePut(Object in, Object b){

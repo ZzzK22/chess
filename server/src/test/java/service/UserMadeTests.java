@@ -1,8 +1,8 @@
 package service;
 
 import org.junit.jupiter.api.*;
-import server.AuthData;
-import server.ErrorResponses;
+import shared.AuthData;
+import ErrorResponses;
 import server.UserData;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)

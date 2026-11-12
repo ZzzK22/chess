@@ -4,6 +4,7 @@ import chess.ChessGame;
 import com.google.gson.Gson;
 import dataaccess.DataAccess;
 import server.*;
+import shared.*;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

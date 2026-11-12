@@ -3,6 +3,7 @@ package service;
 import dataaccess.sql.MariadbDataAccess;
 import org.mindrot.jbcrypt.BCrypt;
 import server.*;
+import shared.*;
 import dataaccess.DataAccess;
 
 import java.util.Collection;

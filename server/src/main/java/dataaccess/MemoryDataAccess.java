@@ -2,6 +2,7 @@ package dataaccess;
 
 import chess.ChessGame;
 import server.*;
+import shared.*;
 
 import java.util.HashMap;
 import java.util.Collection;

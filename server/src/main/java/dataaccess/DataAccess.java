@@ -1,6 +1,7 @@
 package dataaccess;
 
 import server.*;
+import shared.*;
 
 import java.util.Collection;
 

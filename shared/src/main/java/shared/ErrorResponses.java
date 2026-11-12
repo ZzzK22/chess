@@ -1,4 +1,4 @@
-package server;
+package shared;
 
 public enum ErrorResponses {
     InvalidUsername,
@@ -7,5 +7,6 @@ public enum ErrorResponses {
     InvalidAuthToken,
     InvalidColor,
     GameExistsnt,
-    DataAccessError
+    DataAccessError,
+    MajorError, InvalidURL
 }

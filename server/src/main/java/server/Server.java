@@ -4,8 +4,8 @@ import com.google.gson.Gson;
 import io.javalin.*;
 import io.javalin.http.Context;
 import org.jetbrains.annotations.NotNull;
-import org.mindrot.jbcrypt.BCrypt;
 import service.Service;
+import shared.*;
 
 import java.util.Collection;
 
