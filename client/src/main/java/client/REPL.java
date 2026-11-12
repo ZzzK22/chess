@@ -1,5 +1,9 @@
 package client;
 
+import chess.ChessBoard;
+import chess.ChessGame;
+import chess.ChessPiece;
+import chess.ChessPosition;
 import shared.AuthData;
 import shared.ErrorResponses;
 import shared.ResponseData;
@@ -9,8 +13,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Scanner;
 
-import static ui.EscapeSequences.RESET_TEXT_COLOR;
-import static ui.EscapeSequences.SET_TEXT_COLOR_BLUE;
+import static ui.EscapeSequences.*;
 
 public class REPL {
     private static String username = null;
@@ -20,6 +23,9 @@ public class REPL {
     public static void run (int port){
         serverFacade = new ServerFacade(port);
         Scanner stdin = new Scanner(System.in);
+        ChessBoard board = new ChessBoard();
+        board.resetBoard();
+        drawBoard(board, true);
         while(true) {
             loggedIn = username != null;
             System.out.print("[" + (Optional.ofNullable(username).orElse("LOGGED OUT")) + "] $:: ");
@@ -169,5 +175,38 @@ public class REPL {
         printColoredOption("logout", "log out of your account");
         printColoredOption("quit", "quit the program");
         printColoredOption("help", "display this help screen");
+    }
+
+    private static void drawBoard(ChessBoard board, boolean whitePerspective){
+        int direction = whitePerspective ? -1 : 1;
+        int start = whitePerspective ? 8 : 1;
+        System.out.print(SET_TEXT_BOLD);
+        for(int i = start; i < 9 && i > 0; i += direction){
+            for(int j = 9 - start; j < 9 && j > 0; j -= direction){
+                char pieceChar = ' ';
+                ChessPiece piece = board.getPiece(new ChessPosition(i, j));
+                if(piece != null){
+                    switch(board.getPiece(new ChessPosition(i, j)).getPieceType()){
+                        case PAWN -> pieceChar = 'P';
+                        case KNIGHT -> pieceChar = 'N';
+                        case KING -> pieceChar = 'K';
+                        case QUEEN -> pieceChar = 'Q';
+                        case ROOK -> pieceChar = 'R';
+                        case BISHOP -> pieceChar = 'B';
+                    }
+                    if(board.getPiece(new ChessPosition(i, j)).getTeamColor() == ChessGame.TeamColor.WHITE){
+                        System.out.print(EscapeSequences.SET_TEXT_COLOR_BLUE);
+                    } else {
+                        System.out.print(EscapeSequences.SET_TEXT_COLOR_RED);
+                    }
+                }
+                System.out.print((i + j) % 2 == 0 ?
+                        EscapeSequences.SET_BG_COLOR_BLACK :
+                        EscapeSequences.SET_BG_COLOR_WHITE);
+                System.out.print(" " + pieceChar + " ");
+            }
+            System.out.println(EscapeSequences.RESET_BG_COLOR);
+        }
+        System.out.print(RESET_TEXT_BOLD_FAINT);
     }
 }
