@@ -8,6 +8,7 @@ import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.ArrayList;
 
 public class ServerFacade {
     HttpClient httpClient;
@@ -20,6 +21,17 @@ public class ServerFacade {
         httpClient = HttpClient.newHttpClient();
         this.port = port;
         this.url = "http://" + url + ":" + port;
+    }
+
+    public ResponseData<ArrayList<GameData>> listGames(String authToken) {
+        var response = sendRequest(Method.GET, url + "/game", null, authToken);
+        if (response.error() != null){
+            return new ResponseData<>(response.error(), null);
+        }
+        if(response.data().statusCode() == 200) {
+            return new ResponseData<>(null, new Gson().fromJson(response.data().body(), GamesList.class).games());
+        }
+        return new ResponseData<>(getErrorFromErrorMessage(response.data().body()), null);
     }
 
     public ErrorResponses logout(String authToken) {
@@ -64,6 +76,23 @@ public class ServerFacade {
             return new ResponseData<>(null, new Gson().fromJson(response.data().body(), GameData.class).gameID());
         }
         return new ResponseData<>(getErrorFromErrorMessage(response.data().body()), null);
+    }
+
+    public ErrorResponses joinGame(int id, boolean isWhite, String auth) {
+        String request = String.format("""
+                {
+                "playerColor": "%s",
+                "gameID": %d
+                }
+                """, isWhite ? "WHITE" : "BLACK", id);
+        var response = sendRequest(Method.PUT, url + "/game", request, auth);
+        if(response.error() != null){
+            return response.error();
+        }
+        if(response.data().statusCode() == 200) {
+            return null;
+        }
+        return getErrorFromErrorMessage(response.data().body());
     }
 
     private static ErrorResponses getErrorFromErrorMessage(String body) {
