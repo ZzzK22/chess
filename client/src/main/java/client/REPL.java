@@ -20,6 +20,8 @@ public class REPL {
     private static boolean loggedIn = false;
     private static ServerFacade serverFacade;
     private static ArrayList<Integer> gameIdMap = new ArrayList<>();
+    private static boolean validCommand = false;
+
     public static void run (int port){
         serverFacade = new ServerFacade(port);
         Scanner stdin = new Scanner(System.in);
@@ -43,27 +45,17 @@ public class REPL {
                 } else {
                     displayLoggedOutOptions();
                 }
-            } else if(theyHavePut(in, "login")){
-                if(loggedIn){
-                    System.out.print(EscapeSequences.SET_TEXT_COLOR_RED);
-                    System.out.println("You're already logged in as " + username);
-                    System.out.print(EscapeSequences.RESET_TEXT_COLOR);
-                    continue;
-                }
+            } else if(theyHavePut(in, "login") && checkLoggedInStatus(loggedIn, false)){
                 if(input.length < 3){
-                    System.out.print(EscapeSequences.SET_TEXT_COLOR_RED);
-                    System.out.println("Must provide username and password!");
-                    System.out.print(EscapeSequences.SET_TEXT_COLOR_BLUE);
-                    System.out.println("Usage: login <username> <password>");
-                    System.out.print(EscapeSequences.RESET_TEXT_COLOR);
+                    printRedAndBlueTextOnSeparateLines("Must provide username and password!", "Usage: login <username> <password>");
                     continue;
                 }
                 var response = login(input[1], input[2]);
                 if(response.error() != null){
                     switch(response.error()){
-                        case InvalidUsername, InvalidPassword -> System.out.println("Incorrect username or password!");
-                        case MajorError -> System.out.println("Something went wrong internally. Try again later!");
-                        default -> System.out.println("Something went wrong! try again later!");
+                        case InvalidUsername, InvalidPassword -> printRedAndBlueTextOnSeparateLines("Incorrect username or password!", null);
+                        case MajorError -> printRedAndBlueTextOnSeparateLines("Something went wrong internally. Try again later!", null);
+                        default -> printRedAndBlueTextOnSeparateLines("Something went wrong! try again later!", null);
                     }
                 } else {
                     authToken = response.data().authToken();
@@ -71,81 +63,49 @@ public class REPL {
                     System.out.println("You are now logged in as " + username);
                 }
                 continue;
-            } else if(theyHavePut(in, "register")){
-                if(loggedIn){
-                    System.out.print(EscapeSequences.SET_TEXT_COLOR_RED);
-                    System.out.println("You're already logged in as " + username);
-                    System.out.print(EscapeSequences.RESET_TEXT_COLOR);
-                    continue;
-                }
+            } else if(theyHavePut(in, "register") && checkLoggedInStatus(loggedIn, false)){
                 if(input.length < 4){
-                    System.out.print(EscapeSequences.SET_TEXT_COLOR_RED);
-                    System.out.println("Must provide username and password and email!");
-                    System.out.print(EscapeSequences.SET_TEXT_COLOR_BLUE);
-                    System.out.println("Usage: register <username> <password> <email>");
-                    System.out.print(EscapeSequences.RESET_TEXT_COLOR);
+                    printRedAndBlueTextOnSeparateLines("Must provide username and password and email!", "Usage: register <username> <password> <email>");
                     continue;
                 }
                 var response = register(input[1], input[2], input[3]);
                 if(response.error() != null){
                     switch(response.error()){
-                        case InvalidUsername -> System.out.println("Username already taken!");
-                        case InvalidEmail -> System.out.println("You've already signed up using that email!");
-                        case MajorError -> System.out.println("Something went wrong internally. Try again later!");
-                        default -> System.out.println("Something went wrong! try again later!");
+                        case InvalidUsername -> printRedAndBlueTextOnSeparateLines("Username already taken!", null);
+                        case InvalidEmail -> printRedAndBlueTextOnSeparateLines("You've already signed up using that email!", null);
+                        case MajorError -> printRedAndBlueTextOnSeparateLines("Something went wrong internally. Try again later!", null);
+                        default -> printRedAndBlueTextOnSeparateLines("Something went wrong! try again later!", null);
                     }
                 } else {
                     authToken = response.data().authToken();
                     username = response.data().username();
                     System.out.println("You are now logged in as " + username);
                 }
-            } else if(theyHavePut(in, "logout")){
-                if(!loggedIn){
-                    System.out.print(EscapeSequences.SET_TEXT_COLOR_RED);
-                    System.out.println("You're already logged out!");
-                    System.out.print(EscapeSequences.RESET_TEXT_COLOR);
-                    continue;
-                }
+            } else if(theyHavePut(in, "logout") && checkLoggedInStatus(loggedIn, true)){
                 var error = logout();
                 switch (error) {
                     case null -> System.out.println("Logged out successfully!");
-                    case InvalidAuthToken -> System.out.println("Bad authorization");
-                    default -> System.out.println("Something went Wrong!");
+                    case InvalidAuthToken -> printRedAndBlueTextOnSeparateLines("Bad authorization", null);
+                    default -> printRedAndBlueTextOnSeparateLines("Something went Wrong!", null);
                 }
                 username = null;
                 authToken = null;
-            } else if(theyHavePut(in, "create")) {
-                if (!loggedIn) {
-                    System.out.print(EscapeSequences.SET_TEXT_COLOR_RED);
-                    System.out.println("You're not logged in!");
-                    System.out.print(EscapeSequences.RESET_TEXT_COLOR);
-                    continue;
-                }
+            } else if(theyHavePut(in, "create") && checkLoggedInStatus(loggedIn, true)) {
                 if(input.length < 2){
-                    System.out.print(EscapeSequences.SET_TEXT_COLOR_RED);
-                    System.out.println("Must provide game name!");
-                    System.out.print(EscapeSequences.SET_TEXT_COLOR_BLUE);
-                    System.out.println("Usage: create <name>");
-                    System.out.print(EscapeSequences.RESET_TEXT_COLOR);
+                    printRedAndBlueTextOnSeparateLines("Must provide game name!","Usage: create <name>");
                     continue;
                 }
                 String name = input[1];
                 var response = createGame(name);
                 if(response.error() != null){
-                    System.out.println("Something went wrong!");
+                    printRedAndBlueTextOnSeparateLines("Something went wrong!", null);
                     continue;
                 }
                 System.out.println("Successfully created game \"" + name + "\".");
-            } else if(theyHavePut(in, "list")) {
-                if (!loggedIn) {
-                    System.out.print(EscapeSequences.SET_TEXT_COLOR_RED);
-                    System.out.println("You're not logged in!");
-                    System.out.print(EscapeSequences.RESET_TEXT_COLOR);
-                    continue;
-                }
+            } else if(theyHavePut(in, "list") && checkLoggedInStatus(loggedIn, true)) {
                 var response = listGames();
                 if (response.error() != null) {
-                    System.out.println("Something went wrong!");
+                    printRedAndBlueTextOnSeparateLines("Something went wrong!", null);
                     continue;
                 }
                 var games = response.data();
@@ -164,19 +124,9 @@ public class REPL {
                             Optional.ofNullable(game.blackUsername()).orElse(""));
                     System.out.print(RESET_TEXT_COLOR);
                 }
-            } else if (theyHavePut(in, "join")) {
-                if (!loggedIn) {
-                    System.out.print(EscapeSequences.SET_TEXT_COLOR_RED);
-                    System.out.println("You're not logged in!");
-                    System.out.print(EscapeSequences.RESET_TEXT_COLOR);
-                    continue;
-                }
+            } else if (theyHavePut(in, "join") && checkLoggedInStatus(loggedIn, true)) {
                 if(input.length < 3){
-                    System.out.print(EscapeSequences.SET_TEXT_COLOR_RED);
-                    System.out.println("Must provide gameID and player color!");
-                    System.out.print(EscapeSequences.SET_TEXT_COLOR_BLUE);
-                    System.out.println("Usage: join <gameID> (WHITE|BLACK)");
-                    System.out.print(EscapeSequences.RESET_TEXT_COLOR);
+                    printRedAndBlueTextOnSeparateLines("Must provide gameID and player color!", "Usage: join <gameID> (WHITE|BLACK)");
                     continue;
                 }
                 String idString = input[1];
@@ -184,41 +134,55 @@ public class REPL {
                 try {
                     idInteger = Integer.parseInt(idString);
                 } catch (NumberFormatException e) {
-                    System.out.print(EscapeSequences.SET_TEXT_COLOR_RED);
-                    System.out.println("gameID must be a number!");
-                    System.out.print(EscapeSequences.RESET_TEXT_COLOR);
+                    printRedAndBlueTextOnSeparateLines("gameID must be a number!", null);
                     continue;
                 }
                 String color = input[2].toLowerCase();
                 if(!color.equals("white") && !color.equals("black")){
-                    System.out.print(EscapeSequences.SET_TEXT_COLOR_RED);
-                    System.out.println("color must be either WHITE or BLACK");
-                    System.out.print(EscapeSequences.RESET_TEXT_COLOR);
+                    printRedAndBlueTextOnSeparateLines("color must be either WHITE or BLACK", null);
                     continue;
                 }
                 if(idInteger > gameIdMap.size() || idInteger <= 0){
-                    System.out.print(EscapeSequences.SET_TEXT_COLOR_RED);
-                    System.out.println("There's no game with that ID!");
-                    System.out.print(EscapeSequences.RESET_TEXT_COLOR);
+                    printRedAndBlueTextOnSeparateLines("There's no game with that ID!", null);
                     continue;
                 }
                 ErrorResponses error = joinGame(idInteger - 1, color.equals("white"));
                 if (error == ErrorResponses.InvalidColor) {
                     System.out.println("That color is already taken!");
-                    continue;
                 } else if (error != null){
                     System.out.println("Something Went wrong!");
-                    continue;
-                }
+                } else
                 System.out.println("Successfully joined game!");
-            } else {
-                System.out.print(EscapeSequences.SET_TEXT_COLOR_RED);
-                System.out.println("Unknown command \"" + in + "\"");
-                System.out.print(EscapeSequences.RESET_TEXT_COLOR);
-                System.out.println("Type help for options");
+            } else if(!validCommand){
+                printRedAndBlueTextOnSeparateLines("Unknown command \"" + in + "\"", "Type help for options");
             }
+            validCommand = false;
         }
+    }
 
+    private static void printRedAndBlueTextOnSeparateLines(String redText, String blueText){
+        System.out.print(EscapeSequences.SET_TEXT_COLOR_RED);
+        System.out.println(redText);
+        if(blueText != null) {
+            System.out.print(EscapeSequences.SET_TEXT_COLOR_BLUE);
+            System.out.println(blueText);
+        }
+        System.out.print(EscapeSequences.RESET_TEXT_COLOR);
+    }
+
+    private static boolean checkLoggedInStatus(boolean actual, boolean expected){
+        validCommand = true;
+        if(actual == expected){
+            return true;
+        }
+        System.out.print(EscapeSequences.SET_TEXT_COLOR_RED);
+        if(expected){
+            System.out.println("You're not logged in!");
+        } else {
+            System.out.println("You're already logged in!");
+        }
+        System.out.print(EscapeSequences.RESET_TEXT_COLOR);
+        return false;
     }
 
     private static ErrorResponses joinGame(int idInteger, boolean isWhite) {
