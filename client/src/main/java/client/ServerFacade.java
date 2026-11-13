@@ -113,10 +113,10 @@ public class ServerFacade {
         }
     }
 
-    private ResponseData<HttpResponse<String>> sendRequest(Method method, String url) {
+    public ResponseData<HttpResponse<String>> sendRequest(Method method, String url) {
         return sendRequest(method, url, null);
     }
-    private ResponseData<HttpResponse<String>> sendRequest(Method method, String url, String request) {
+    public ResponseData<HttpResponse<String>> sendRequest(Method method, String url, String request) {
         return sendRequest(method, url, request, null);
     }
 
